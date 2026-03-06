@@ -59,6 +59,7 @@ CREATE TABLE lager(
     maks_kaffe      int not null,
     maks_mælk       int not null,
     primary key(lager_id)
+    foreign key (opfyldning_id) references opfyldning(opfyldning_id)
 );
 
 CREATE TABLE transaktion(
@@ -91,5 +92,5 @@ foreign key (transakion_id) references transaktion(transakion_id)
 
 
 
-
+-- Lille ændring
 
