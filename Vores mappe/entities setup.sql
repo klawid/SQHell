@@ -89,5 +89,8 @@ foreign key (transakion_id) references transaktion(transakion_id)
 );
 
 
+
+
+
 -- Lille ændring
 
