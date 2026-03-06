@@ -7,7 +7,8 @@ INSERT INTO drink VALUES
 -- Ansatte
 INSERT INTO ansat VALUES
 (1, 'Jens','Git','Arbejdsdreng', 'JeGi', 'kodeord123', FALSE),
-(2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE);
+(2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE),
+(3, 'Donald', 'Trump', 'President', 'The_trumping_man', 'xxBuild_great_wall_xd_xd', FALSE);
 
 -- Opfyldning
 INSERT INTO opfyldning VALUES 
