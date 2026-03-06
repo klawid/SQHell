@@ -23,13 +23,19 @@ INSERT INTO daglig_forbrug VALUES
 
 -- Opfyldning
 INSERT INTO opfyldning VALUES 
-(1, 2, 2000, 500, 200, 01/02-26, 14:36:00),
-(2, 2, 500, 1000, 0, 02/02-26, 13:15:016),
-(3, 2, 0, 0, -2000, 03/02-26, 00:41:10),
-(4, 2, 0, 0, 3000, 03/02-26, 10:06:51);
-
+(1, 2, 2000, 500, 200, '26-02-01', '14:36:00'),
+(2, 2, 500, 1000, 0, '26-02-02', '13:15:016'),
+(3, 2, 0, 0, -2000, '26-02-03', '00:41:10'),
+(4, 2, 0, 0, 3000, '26-02-03', '10:06:51');
 
 -- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = 0 fordi det kan gøres på en bedre måde, vi ikke har tid til
 INSERT INTO opfyldning VALUES 
 (1,1,2,1,40,'kort'.)
 
+-- Rengøring
+INSERT INTO rengøring VALUES 
+(1, 1, '26-02-02'),
+(1, 1, '26-02-09'),
+(1, 3, '26-02-16'),
+(1, 1, '26-02-23'),
+(1, 1, '26-03-02'),
