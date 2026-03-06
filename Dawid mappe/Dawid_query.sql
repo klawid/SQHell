@@ -40,6 +40,17 @@ primary key(medarbejder_id)
 );
 
 
+CREATE TABLE transaktion(
+indbetaling int not null,
+betalingstype		char(25) not null,
+byttepenge	float not null,
+dato 	date not null,	
+tidspunkt 	time not null,
+primary key(medarbejder_id)
+foreign key (medarbejder_id) references ansat(medarbejder_id)
+foreign key (drink_id) references drink(drink_id)
+foreign key (lager_id) references lager(lager_id)
+);
 
 
 
