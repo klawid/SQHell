@@ -3,7 +3,7 @@
 CREATE TABLE drink(
 drink_id int not null, 
 navn char(25) not null,
-kaffe_forbrug_kg int not null,
+kaffe_forbrug_g int not null,
 mælk_forbrug_ml int not null, 
 vand_forbrug_ml int not null, 
 pris int not null, 
@@ -34,11 +34,18 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 CREATE TABLE opfyldning(
 opfyldning_id 			int not null,
 medarbejder_id			int not null,
-opfyldning_kaffe		int not null,
-opfyldning_mælk			int not null,
+opfyldning_kaffe_g		int not null,
+opfyldning_mælk_ml			int not null,
 opfyldning_kontanter	int not null,
 dato					date not null,	
 tidspunkt				TIME not null,
+    antal_100kr     int not null,
+    antal_50kr      int not null,
+    antal_20kr      int not null,
+    antal_10kr      int not null,
+    antal_5kr       int not null,
+    antal_2kr       int not null,
+    antal_1kr       int not null,
 primary key(opfyldning_id ),
 foreign key (medarbejder_id) references ansat(medarbejder_id)
 );
@@ -47,7 +54,6 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 CREATE TABLE lager(
     lager_id        int not null,
     opfyldning_id   int not null,
-    antal_200kr     int not null,
     antal_100kr     int not null,
     antal_50kr      int not null,
     antal_20kr      int not null,
@@ -55,7 +61,6 @@ CREATE TABLE lager(
     antal_5kr       int not null,
     antal_2kr       int not null,
     antal_1kr       int not null,
-    antal_50ører    int not null,
     mængde_kaffe    int not null,
     mængde_mælk     int not null,
     maks_kaffe      int not null,
