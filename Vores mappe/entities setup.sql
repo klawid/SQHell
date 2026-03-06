@@ -3,8 +3,10 @@
 CREATE TABLE drink(
 drink_id int not null, 
 navn char(25) not null,
-mælk_forbrug int not null, 
-vand_forbrug int not null, 
+kaffe_forbrug_kg int not null,
+mælk_forbrug_ml int not null, 
+vand_forbrug_ml int not null, 
+pris int not null, 
 primary key(drink_id)
 );
 
