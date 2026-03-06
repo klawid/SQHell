@@ -1,3 +1,3 @@
 # SQHell
 
-nigga
+Read me harder 
