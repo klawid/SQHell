@@ -41,29 +41,6 @@ primary key(opfyldning_id ),
 foreign key (medarbejder_id) references ansat(medarbejder_id)
 );
 
-CREATE TABLE daglig_forbrug(
-forbrug_id			int not null,
-transaktion_id		int not null,
-sum_kaffe			int not null,
-sum_mælk			int not null,
-sum_vand			int not null,
-primary key(forbrug_id ),
-foreign key (transaktion_id) references transaktion(transaktion_id)
-);
-
-
-CREATE TABLE transaktion(
-indbetaling int not null,
-betalingstype		char(25) not null,
-byttepenge	float not null,
-dato 	date not null,	
-tidspunkt 	time not null,
-primary key(medarbejder_id)
-foreign key (medarbejder_id) references ansat(medarbejder_id)
-foreign key (drink_id) references drink(drink_id)
-foreign key (lager_id) references lager(lager_id)
-);
-
 
 CREATE TABLE lager(
     lager_id        int not null,
@@ -83,6 +60,35 @@ CREATE TABLE lager(
     maks_mælk       int not null,
     primary key(lager_id)
 );
+
+CREATE TABLE transaktion(
+transakion_id			int not null,
+medarbejder_id			int not null,
+drink_id				int not null,
+lager_id  				int not null,
+indbetaling 			int not null,
+betalingstype			char(25) not null,
+byttepenge				float not null,
+dato 					date not null,	
+tidspunkt 				time not null,
+primary key(transakion_id),
+foreign key (medarbejder_id) references ansat(medarbejder_id),
+foreign key (drink_id) references drink(drink_id),
+foreign key (lager_id) references lager(lager_id)
+);
+
+CREATE TABLE daglig_forbrug(
+forbrug_id			int not null,
+transakion_id		int not null,
+sum_kaffe			int not null,
+sum_mælk			int not null,
+sum_vand			int not null,
+primary key(forbrug_id),
+foreign key (transakion_id) references transaktion(transakion_id)
+);
+
+
+
 
 
 
