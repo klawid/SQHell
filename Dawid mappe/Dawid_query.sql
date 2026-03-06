@@ -20,25 +20,36 @@ primary key(medarbejder_id)
 );
 
 
-CREATE TABLE ansat(
-medarbejder_id int not null,
-navn		char(25) not null,
-efternavn	char(25) not null,
-stilling 	char(25) not null,	
-brugernavn 	char(25) not null,
-kodeord 	char(25) not null,
-adgangstilladelse bool not null,
-primary key(medarbejder_id)
-);
-
-
 CREATE TABLE rengøring(
 rengøring_id 		int not null,
-medarbejder_id		char(25) not null,
+medarbejder_id		int not null,
 dato	 			date not null,
-primary key(medarbejder_id)
+primary key(rengøring_id),
+foreign key (medarbejder_id) references ansat(medarbejder_id)
 );
 
+
+CREATE TABLE opfyldning(
+opfyldning_id 			int not null,
+medarbejder_id			int not null,
+opfyldning_kaffe		int not null,
+opfyldning_mælk			int not null,
+opfyldning_kontanter	int not null,
+dato					date not null,	
+tidspunkt				TIME not null,
+primary key(opfyldning_id ),
+foreign key (medarbejder_id) references ansat(medarbejder_id)
+);
+
+CREATE TABLE daglig_forbrug(
+forbrug_id			int not null,
+transaktion_id		int not null,
+sum_kaffe			int not null,
+sum_mælk			int not null,
+sum_vand			int not null,
+primary key(forbrug_id ),
+foreign key (transaktion_id) references transaktion(transaktion_id)
+);
 
 
 
