@@ -58,7 +58,7 @@ CREATE TABLE lager(
     mængde_mælk     int not null,
     maks_kaffe      int not null,
     maks_mælk       int not null,
-    primary key(lager_id)
+    primary key(lager_id),
     foreign key (opfyldning_id) references opfyldning(opfyldning_id)
 );
 
