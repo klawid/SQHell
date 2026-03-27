@@ -75,13 +75,8 @@ medarbejder_id			int not null,
 drink_id				int not null,
 lager_id  				int not null,
 indbetaling 			int not null,
-<<<<<<< HEAD
 betalingstype			bool not null, --FALSE er kort, TRUE er kontant
 byttepenge				int not null, --Hvis vi kun har hele kroner der kan betales med, og hele priser på drinks, så kan denne vel godt være en int (Var float)
-=======
-betalingstype			bool not null, -- 0 er kort, 1 er kontant
-byttepenge				int not null, -- 	Hvis vi kun har hele kroner der kan betales med, og hele priser på drinks, så kan denne vel godt være en int (Var float)
->>>>>>> ab110e2f73c0c79bc12d7cda3d34d8904ad04d07
 dato 					date not null,	
 tidspunkt 				time not null,
 primary key(transakion_id),
