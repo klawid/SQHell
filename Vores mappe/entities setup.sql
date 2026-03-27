@@ -1,4 +1,4 @@
--- Laver lige drinks alter
+-- Laver lige drinks after
 
 CREATE TABLE drink(
 drink_id int not null, 
@@ -76,7 +76,7 @@ drink_id				int not null,
 lager_id  				int not null,
 indbetaling 			int not null,
 betalingstype			char(25) not null,
-byttepenge				float not null,
+byttepenge				int not null, --Hvis vi kun har hele kroner der kan betales med, og hele priser på drinks, så kan denne vel godt være en int (Var float)
 dato 					date not null,	
 tidspunkt 				time not null,
 primary key(transakion_id),
@@ -99,6 +99,4 @@ foreign key (transakion_id) references transaktion(transakion_id)
 
 
 
-
--- Lille ændring
 
