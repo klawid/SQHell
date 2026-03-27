@@ -86,6 +86,24 @@ END$$
 
 DELIMITER ;
 
+
+
+SELECT 
+    t.transakion_id,
+    t.indbetaling,
+    d.pris,
+    CASE 
+        WHEN t.indbetaling >= d.pris 
+        THEN t.indbetaling - d.pris
+        ELSE 0
+    END AS byttepenge
+FROM transaktion t
+JOIN drink d ON t.drink_id = d.drink_id;
+
+
+
+
+
 DELIMITER //
 
 CREATE PROCEDURE beregn_byttepenge (
