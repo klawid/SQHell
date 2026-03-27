@@ -124,17 +124,69 @@ DELIMITER ;
 
 
 
-SELECT 
-    t.transakion_id,
-    t.indbetaling,
-    d.pris,
-    CASE 
-        WHEN t.indbetaling >= d.pris 
-        THEN t.indbetaling - d.pris
-        ELSE 0
-    END AS byttepenge
-FROM transaktion t
-JOIN drink d ON t.drink_id = d.drink_id;
+DELIMITER //
+
+CREATE PROCEDURE køb_drink (
+    IN p_medarbejder_id INT,
+    IN p_drink_id INT,
+    IN p_lager_id INT,
+    IN p_indbetaling INT,
+    IN p_betalingstype BOOL -- 0 = kort, 1 = kontant
+)
+BEGIN
+    DECLARE v_pris INT;
+    DECLARE v_byttepenge INT;
+
+    -- hent pris
+    SELECT pris INTO v_pris
+    FROM drink
+    WHERE drink_id = p_drink_id;
+
+    -- 💳 KORT
+    IF p_betalingstype = 0 THEN
+        SET v_byttepenge = 0;
+        SET p_indbetaling = 0;
+
+    -- 💰 KONTANT
+    ELSE
+        IF p_indbetaling < v_pris THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
+        END IF;
+
+        SET v_byttepenge = p_indbetaling - v_pris;
+
+        -- 💡 HER kan du kalde din mønt-funktion
+        CALL beregn_byttepenge(v_byttepenge, p_lager_id);
+    END IF;
+
+    -- indsæt transaktion
+    INSERT INTO transaktion (
+        transakion_id,
+        medarbejder_id,
+        drink_id,
+        lager_id,
+        indbetaling,
+        betalingstype,
+        byttepenge,
+        dato,
+        tidspunkt
+    )
+    VALUES (
+        (SELECT IFNULL(MAX(transakion_id)+1,1) FROM transaktion),
+        p_medarbejder_id,
+        p_drink_id,
+        p_lager_id,
+        p_indbetaling,
+        p_betalingstype,
+        v_byttepenge,
+        CURRENT_DATE,
+        CURRENT_TIME
+    );
+
+END //
+
+DELIMITER ;
 
 
 
