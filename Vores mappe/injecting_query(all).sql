@@ -12,15 +12,20 @@ INSERT INTO ansat VALUES
 (2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE),
 (3, 'Donald', 'Trump', 'President', 'The_trumping_man', 'xxBuild_great_wall_xd_xd', FALSE);
 
+-- Rengøring
+INSERT INTO rengøring VALUES 
+(1, 1, '2026-02-02'),
+(2, 1, '2026-02-09'),
+(3, 3, '2026-02-16'),
+(4, 1, '2026-02-23'),
+(5, 1, '2026-03-02');
 
--- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
--- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
-INSERT INTO lager VALUES
-(1, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
--- Daglig forbrug - samme som lager. 
-INSERT INTO daglig_forbrug VALUES
-(0, 0,'2000-01-01', 0,0,0); 
+
+-- Daglig forbrug - samme som lager.
+-- Denne kode funger ikke: Det er noget der skal DANNES I KAFFEDDL 
+-- INSERT INTO daglig_forbrug VALUES
+-- (1, 0,'2000-01-01', 0,0,0); 
 
 
 
@@ -32,6 +37,11 @@ INSERT INTO opfyldning VALUES
 (4, 2, 0, 0, '2026-02-03', '10:06:51', 15, 0, 0, 0, 0, 0, 0, 0);
 
 
+
+-- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
+-- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
+INSERT INTO lager VALUES
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 -- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = FALSE 
 -- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
@@ -59,31 +69,6 @@ INSERT INTO transaktion VALUES
 (17, 3, 1, 1,  0,  0, 0, '2026-03-01', '11:00:00');
 
 
--- Rengøring
-INSERT INTO rengøring VALUES 
-(1, 1, '2026-02-02'),
-(2, 1, '2026-02-09'),
-(3, 3, '2026-02-16'),
-(4, 1, '2026-02-23'),
-(5, 1, '2026-03-02'),
-
-
--- Daglig forbrug (daglige totaler – én række per dag med aktivitet)
-INSERT INTO daglig_forbrug VALUES
-(1, 1,  '2026-01-05', 30, 120, 200),
-(2, 5,  '2026-01-12', 14,   0,  30),
-(3, 6,  '2026-01-19', 14,   0,  30),
-(4, 7,  '2026-01-26',  8, 120, 200),
-(5, 8,  '2026-02-02',  8,   0, 200),
-(6, 9,  '2026-02-03',  8,   0, 200),
-(7, 10, '2026-02-10',  8,   0, 200),
-(8, 11, '2026-02-17',  8, 120, 200),
-(9, 12, '2026-02-24',  8, 120, 200),
-(10,15, '2026-02-05',  8, 120, 200),
-(11,16, '2026-02-19', 14,   0,  30),
-(12,13, '2026-03-03', 14,   0,  30),
-(13,14, '2026-03-10',  8,   0, 200),
-(14,17, '2026-03-01',  8,   0, 200);
 
 
 -- Trigger kode for lager 
@@ -121,6 +106,7 @@ END IF;
 END$$
 
 DELIMITER ;
+
 
 DELIMITER //
 
