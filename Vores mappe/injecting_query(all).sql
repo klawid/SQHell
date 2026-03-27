@@ -49,8 +49,6 @@ INSERT INTO rengøring VALUES
 (1, 1, '2026-02-23'),
 (1, 1, '2026-03-02'),
 
-
-
 -- Trigger kode for lager 
 DELIMITER $$
 
