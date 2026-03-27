@@ -1,7 +1,7 @@
 
 -- Drinks 
 INSERT INTO drink VALUES 
-(1,'Americano',30 , 0, 330, 30) , 
+(1,'Americano',30 , 0, 330, 25) , 
 (2,'Cappuccino', 30, 150, 150, 30) , 
 (3,'Espresso', 100, 0, 50, 35);
 
@@ -38,6 +38,7 @@ INSERT INTO opfyldning VALUES
 
 
 
+
 -- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
 -- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
 INSERT INTO lager VALUES
@@ -45,6 +46,10 @@ INSERT INTO lager VALUES
 
 -- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = FALSE 
 -- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
+
+-- transaktion	- Regl: Når kort anvendes, sættes "kontant_indbetaling" = 0 
+-- Kolonner: id, medarbejder_id, drink_id, lager_id, kontant_indbetaling, betalingstype, byttepenge, dato, tidspunkt
+
 -- betalingstype: 0 = kort, 1 = kontant
 INSERT INTO transaktion VALUES
 -- Jens Git – tidlige morgenvagter i januar
@@ -52,20 +57,20 @@ INSERT INTO transaktion VALUES
 (2,  1, 1, 1,  0,  0, 0, '2026-01-05', '05:15:00'),
 (3,  1, 3, 1,  0,  0, 0, '2026-01-05', '05:17:00'),
 (4,  1, 1, 1,  0,  0, 0, '2026-01-05', '05:19:00'),
-(5,  1, 3, 1,  30, 1, 5, '2026-01-12', '06:00:00'),
-(6,  1, 3, 1,  30, 1, 5, '2026-01-19', '06:05:00'),
+(5,  1, 3, 1,  40, 1, 5, '2026-01-12', '06:00:00'),
+(6,  1, 3, 1,  40, 1, 5, '2026-01-19', '06:05:00'),
 (7,  1, 2, 1,  0,  0, 0, '2026-01-26', '05:55:00'),
-(8,  1, 1, 1,  20, 1, 0, '2026-02-02', '06:10:00'),
+(8,  1, 1, 1,  40, 1, 15, '2026-02-02', '06:10:00'),
 -- Klawid Dasa – regelmæssige køb
 (9,  2, 1, 1,  0,  0, 0, '2026-02-03', '10:00:00'),
 (10, 2, 1, 1,  0,  0, 0, '2026-02-10', '10:00:00'),
-(11, 2, 2, 1,  30, 1, 0, '2026-02-17', '10:00:00'),
-(12, 2, 2, 1,  30, 1, 0, '2026-02-24', '10:00:00'),
+(11, 2, 2, 1,  35, 1, 0, '2026-02-17', '10:00:00'),
+(12, 2, 2, 1,  35, 1, 0, '2026-02-24', '10:00:00'),
 (13, 2, 3, 1,  0,  0, 0, '2026-03-03', '10:00:00'),
 (14, 2, 1, 1,  0,  0, 0, '2026-03-10', '10:00:00'),
 -- Donald Trump – lejlighedsvise køb
 (15, 3, 2, 1,  0,  0, 0, '2026-02-05', '08:30:00'),
-(16, 3, 3, 1,  25, 1, 0, '2026-02-19', '09:00:00'),
+(16, 3, 3, 1,  200, 1, 165, '2026-02-19', '09:00:00'),
 (17, 3, 1, 1,  0,  0, 0, '2026-03-01', '11:00:00');
 
 
@@ -110,76 +115,64 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE beregn_byttepenge (
-    IN p_beloeb INT,
-    IN p_lager_id INT
+CREATE PROCEDURE køb_drink (
+    IN p_medarbejder_id INT,
+    IN p_drink_id INT,
+    IN p_lager_id INT,
+    IN p_indbetaling INT,
+    IN p_betalingstype BOOL -- 0 = kort, 1 = kontant
 )
 BEGIN
-    DECLARE rest INT;
+    DECLARE v_pris INT;
+    DECLARE v_byttepenge INT;
 
-    DECLARE beholdning100 INT;
-    DECLARE beholdning50 INT;
-    DECLARE beholdning20 INT;
-    DECLARE beholdning10 INT;
-    DECLARE beholdning5 INT;
-    DECLARE beholdning2 INT;
-    DECLARE beholdning1 INT;
+    -- hent pris
+    SELECT pris INTO v_pris
+    FROM drink
+    WHERE drink_id = p_drink_id;
 
-    DECLARE byttepenge100 INT DEFAULT 0;
-    DECLARE byttepenge50 INT DEFAULT 0;
-    DECLARE byttepenge20 INT DEFAULT 0;
-    DECLARE byttepenge10 INT DEFAULT 0;	 	
-    DECLARE byttepenge5 INT DEFAULT 0;
-    DECLARE byttepenge2 INT DEFAULT 0;
-    DECLARE byttepenge1 INT DEFAULT 0;
+    -- 💳 KORT
+    IF p_betalingstype = 0 THEN
+        SET v_byttepenge = 0;
+        SET p_indbetaling = 0;
 
-    -- hent lager
-    SELECT antal_100kr, antal_50kr, antal_20kr, antal_10kr,
-           antal_5kr, antal_2kr, antal_1kr
-    INTO beholdning100, beholdning50, beholdning20, beholdning10, beholdning5, beholdning2, beholdning1
-    FROM lager
-    WHERE lager_id = p_lager_id;
+    -- 💰 KONTANT
+    ELSE
+        IF p_indbetaling < v_pris THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
+        END IF;
 
-    SET rest = p_beloeb;
+        SET v_byttepenge = p_indbetaling - v_pris;
 
-    -- 100 kr
-    SET byttepenge100 = LEAST(rest DIV 100, beholdning100);
-    SET rest = rest - byttepenge100 * 100;
+        -- 💡 HER kan du kalde din mønt-funktion
+        CALL beregn_byttepenge(v_byttepenge, p_lager_id);
+    END IF;
 
-    -- 50 kr
-    SET byttepenge50 = LEAST(rest DIV 50, beholdning50);
-    SET rest = rest - byttepenge50 * 50;
+    -- indsæt transaktion
+    INSERT INTO transaktion (
+        transakion_id,
+        medarbejder_id,
+        drink_id,
+        lager_id,
+        kontant_indbetaling,
+        betalingstype,
+        byttepenge,
+        dato,
+        tidspunkt
+    )
+    VALUES (
+        (SELECT IFNULL(MAX(transakion_id)+1,1) FROM transaktion),
+        p_medarbejder_id,
+        p_drink_id,
+        p_lager_id,
+        p_indbetaling,
+        p_betalingstype,
+        v_byttepenge,
+        CURRENT_DATE,
+        CURRENT_TIME
+    );
 
-    -- 20 kr
-    SET byttepenge20 = LEAST(rest DIV 20, beholdning20);
-    SET rest = rest - byttepenge20 * 20;
-
-    -- 10 kr
-    SET byttepenge10 = LEAST(rest DIV 10, beholdning10);
-    SET rest = rest - byttepenge10 * 10;
-
-    -- 5 kr
-    SET byttepenge5 = LEAST(rest DIV 5, beholdning5);
-    SET rest = rest - byttepenge5 * 5;
-
-    -- 2 kr
-    SET byttepenge2 = LEAST(rest DIV 2, beholdning2);
-    SET rest = rest - byttepenge2 * 2;
-
-    -- 1 kr
-    SET byttepenge1 = LEAST(rest, beholdning1);
-    SET rest = rest - byttepenge1;
-
-    -- resultat
-    SELECT 
-        byttepenge100 AS '100kr',
-        byttepenge50  AS '50kr',
-        byttepenge20  AS '20kr',
-        byttepenge10  AS '10kr',
-        byttepenge5   AS '5kr',
-        byttepenge2   AS '2kr',
-        byttepenge1   AS '1kr',
-        rest AS 'mangler';
 END //
 
 DELIMITER ;
