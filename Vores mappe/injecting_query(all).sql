@@ -33,8 +33,8 @@ INSERT INTO opfyldning VALUES
 
 
 
--- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = 0 
--- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
+-- transaktion	- Regl: Når kort anvendes, sættes "kontant_indbetaling" = 0 
+-- Kolonner: id, medarbejder_id, drink_id, lager_id, kontant_indbetaling, betalingstype, byttepenge, dato, tidspunkt
 -- betalingstype: 0 = kort, 1 = kontant
 INSERT INTO transaktion VALUES
 -- Jens Git – tidlige morgenvagter i januar
@@ -166,7 +166,7 @@ BEGIN
         medarbejder_id,
         drink_id,
         lager_id,
-        indbetaling,
+        kontant_indbetaling,
         betalingstype,
         byttepenge,
         dato,
@@ -184,86 +184,6 @@ BEGIN
         CURRENT_TIME
     );
 
-END //
-
-DELIMITER ;
-
-
-
-
-
-DELIMITER //
-
-CREATE PROCEDURE beregn_byttepenge (
-    IN p_beloeb INT,
-    IN p_lager_id INT
-)
-BEGIN
-    DECLARE rest INT;
-
-    DECLARE beholdning100 INT;
-    DECLARE beholdning50 INT;
-    DECLARE beholdning20 INT;
-    DECLARE beholdning10 INT;
-    DECLARE beholdning5 INT;
-    DECLARE beholdning2 INT;
-    DECLARE beholdning1 INT;
-
-    DECLARE byttepenge100 INT DEFAULT 0;
-    DECLARE byttepenge50 INT DEFAULT 0;
-    DECLARE byttepenge20 INT DEFAULT 0;
-    DECLARE byttepenge10 INT DEFAULT 0;	 	
-    DECLARE byttepenge5 INT DEFAULT 0;
-    DECLARE byttepenge2 INT DEFAULT 0;
-    DECLARE byttepenge1 INT DEFAULT 0;
-
-    -- hent lager
-    SELECT antal_100kr, antal_50kr, antal_20kr, antal_10kr,
-           antal_5kr, antal_2kr, antal_1kr
-    INTO beholdning100, beholdning50, beholdning20, beholdning10, beholdning5, beholdning2, beholdning1
-    FROM lager
-    WHERE lager_id = p_lager_id;
-
-    SET rest = p_beloeb;
-
-    -- 100 kr
-    SET byttepenge100 = LEAST(rest DIV 100, beholdning100);
-    SET rest = rest - byttepenge100 * 100;
-
-    -- 50 kr
-    SET byttepenge50 = LEAST(rest DIV 50, beholdning50);
-    SET rest = rest - byttepenge50 * 50;
-
-    -- 20 kr
-    SET byttepenge20 = LEAST(rest DIV 20, beholdning20);
-    SET rest = rest - byttepenge20 * 20;
-
-    -- 10 kr
-    SET byttepenge10 = LEAST(rest DIV 10, beholdning10);
-    SET rest = rest - byttepenge10 * 10;
-
-    -- 5 kr
-    SET byttepenge5 = LEAST(rest DIV 5, beholdning5);
-    SET rest = rest - byttepenge5 * 5;
-
-    -- 2 kr
-    SET byttepenge2 = LEAST(rest DIV 2, beholdning2);
-    SET rest = rest - byttepenge2 * 2;
-
-    -- 1 kr
-    SET byttepenge1 = LEAST(rest, beholdning1);
-    SET rest = rest - byttepenge1;
-
-    -- resultat
-    SELECT 
-        byttepenge100 AS '100kr',
-        byttepenge50  AS '50kr',
-        byttepenge20  AS '20kr',
-        byttepenge10  AS '10kr',
-        byttepenge5   AS '5kr',
-        byttepenge2   AS '2kr',
-        byttepenge1   AS '1kr',
-        rest AS 'mangler';
 END //
 
 DELIMITER ;
