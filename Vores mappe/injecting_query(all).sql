@@ -1,7 +1,7 @@
 
--- Drinks -- Ai was used in creation of the drinks - for finding avrage values of used coffe and such 
+-- Drinks 
 INSERT INTO drink VALUES 
-(1,'Americano',0,30,8, 30) , (2,'Cappuccino',100,30,8, 30) , (3,'Espresso', 0, 30, 10, 99);
+(1,'Americano',30 , 0,330 , 30) , (2,'Cappuccino',30,150,150, 30) , (3,'Espresso', 100 , 0, 50, 99);
 
 
 -- Ansatte
@@ -50,6 +50,7 @@ INSERT INTO rengøring VALUES
 (1, 1, '2026-03-02'),
 
 -- Trigger kode for lager 
+-- Ai was used in creation of this
 DELIMITER $$
 
 CREATE TRIGGER update_lager_after_transaktion
