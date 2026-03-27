@@ -105,7 +105,7 @@ BEGIN
     DECLARE byttepenge100 INT DEFAULT 0;
     DECLARE byttepenge50 INT DEFAULT 0;
     DECLARE byttepenge20 INT DEFAULT 0;
-    DECLARE byttepenge10 INT DEFAULT 0;
+    DECLARE byttepenge10 INT DEFAULT 0;	 	
     DECLARE byttepenge5 INT DEFAULT 0;
     DECLARE byttepenge2 INT DEFAULT 0;
     DECLARE byttepenge1 INT DEFAULT 0;
