@@ -48,3 +48,41 @@ INSERT INTO rengøring VALUES
 (1, 3, '2026-02-16'),
 (1, 1, '2026-02-23'),
 (1, 1, '2026-03-02'),
+
+
+
+-- Trigger kode for lager 
+DELIMITER $$
+
+CREATE TRIGGER update_lager_after_transaktion
+AFTER INSERT ON transaktion
+FOR EACH ROW
+BEGIN
+    DECLARE kaffe_used INT;
+    DECLARE mælk_used INT;
+    DECLARE vand_used INT;
+
+    -- Get ingredient usage from drink
+	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
+    INTO kaffe_used, mælk_used, kakao_used
+    FROM drink
+    WHERE id = NEW.drink_id;
+
+IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_used THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Not enough coffee in stock';
+END IF;	
+
+    -- Update lager (assuming only one row with id = 1)
+    UPDATE lager
+    SET 
+        mængde_kaffe = mængde_kaffe - kaffe_used,
+        mængde_mælk = mængde_mælk - mælk_used
+    WHERE lager_id = NEW.lager_id;
+
+
+
+END$$
+
+DELIMITER ;
+
