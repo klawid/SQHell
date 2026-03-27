@@ -53,7 +53,7 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 
 CREATE TABLE lager(
     lager_id        int not null,
-    opfyldning_id   int not null,
+    opfyldning_id   int,
     antal_100kr     int not null,
     antal_50kr      int not null,
     antal_20kr      int not null,
