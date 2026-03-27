@@ -1,7 +1,9 @@
 
--- Drinks -- Ai was used in creation of the drinks - for finding avrage values of used coffe and such 
+-- Drinks 
 INSERT INTO drink VALUES 
-(1,'Americano',0,30,8, 30) , (2,'Cappuccino',100,30,8, 30) , (3,'Espresso', 0, 30, 10, 99);
+(1,'Americano',30 , 0, 330, 30) , 
+(2,'Cappuccino', 30, 150, 150, 30) , 
+(3,'Espresso', 100, 0, 50, 35);
 
 
 -- Ansatte
@@ -11,9 +13,10 @@ INSERT INTO ansat VALUES
 (3, 'Donald', 'Trump', 'President', 'The_trumping_man', 'xxBuild_great_wall_xd_xd', FALSE);
 
 
--- Lager  : Det her starter den bare. Senere skal vi opdatere dette lager med id 1, og så kommer opfyldning id til at gå op
+-- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
+-- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
 INSERT INTO lager VALUES
-(1, 0, 0, 0,0,0,0,0,0, 0 , 0, 2000,2000); 
+(1, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 -- Daglig forbrug - samme som lager. 
 INSERT INTO daglig_forbrug VALUES
@@ -28,30 +31,63 @@ INSERT INTO opfyldning VALUES
 (3, 2, 0, 0, '2026-02-03', '00:41:10', -10, 0, 0, 0, 0, 0, 0, 0),
 (4, 2, 0, 0, '2026-02-03', '10:06:51', 15, 0, 0, 0, 0, 0, 0, 0);
 
--- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = 0 
 
 
-INSERT INTO transaktion VALUES 
--- Jens git - mange drinks få dage 
-(1,1,2,1,0,'26-01-01','5:06:51'), (2,1,1,1,0,'26-01-01','5:15:00'), (3,1,3,1,0,'26-01-01','5:15:50'),(4,1,1,1,0,'26-01-01','5:16:00'),
-(5,1,3,1,0,'25-12-24','23:50:51'), (6,1,3,1,0,'25-12-24','23:55:00'), (7,1,3,1,0,'25-12-24','23:56:50'),(8,1,3,1,0,'25-12-24','23:59:00'),
--- Klawid Dasa 
-(9,2,1,1,0,'25-12-22','10:00:00') , (10,2,1,1,0,'25-12-26','10:00:00') , (11,2,1,1,0,'25-12-28','10:00:00') ,(12,2,1,1,0,'26-01-01','10:00:00') ,
--- Donald Trump
-(9,2,1,1,0,'25-12-22','10:00:00') ;
+-- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = FALSE 
+-- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
+-- betalingstype: 0 = kort, 1 = kontant
+INSERT INTO transaktion VALUES
+-- Jens Git – tidlige morgenvagter i januar
+(1,  1, 2, 1,  0,  0, 0, '2026-01-05', '05:06:51'),
+(2,  1, 1, 1,  0,  0, 0, '2026-01-05', '05:15:00'),
+(3,  1, 3, 1,  0,  0, 0, '2026-01-05', '05:17:00'),
+(4,  1, 1, 1,  0,  0, 0, '2026-01-05', '05:19:00'),
+(5,  1, 3, 1,  30, 1, 5, '2026-01-12', '06:00:00'),
+(6,  1, 3, 1,  30, 1, 5, '2026-01-19', '06:05:00'),
+(7,  1, 2, 1,  0,  0, 0, '2026-01-26', '05:55:00'),
+(8,  1, 1, 1,  20, 1, 0, '2026-02-02', '06:10:00'),
+-- Klawid Dasa – regelmæssige køb
+(9,  2, 1, 1,  0,  0, 0, '2026-02-03', '10:00:00'),
+(10, 2, 1, 1,  0,  0, 0, '2026-02-10', '10:00:00'),
+(11, 2, 2, 1,  30, 1, 0, '2026-02-17', '10:00:00'),
+(12, 2, 2, 1,  30, 1, 0, '2026-02-24', '10:00:00'),
+(13, 2, 3, 1,  0,  0, 0, '2026-03-03', '10:00:00'),
+(14, 2, 1, 1,  0,  0, 0, '2026-03-10', '10:00:00'),
+-- Donald Trump – lejlighedsvise køb
+(15, 3, 2, 1,  0,  0, 0, '2026-02-05', '08:30:00'),
+(16, 3, 3, 1,  25, 1, 0, '2026-02-19', '09:00:00'),
+(17, 3, 1, 1,  0,  0, 0, '2026-03-01', '11:00:00');
 
 
 -- Rengøring
 INSERT INTO rengøring VALUES 
 (1, 1, '2026-02-02'),
-(1, 1, '2026-02-09'),
-(1, 3, '2026-02-16'),
-(1, 1, '2026-02-23'),
-(1, 1, '2026-03-02'),
+(2, 1, '2026-02-09'),
+(3, 3, '2026-02-16'),
+(4, 1, '2026-02-23'),
+(5, 1, '2026-03-02'),
 
+
+-- Daglig forbrug (daglige totaler – én række per dag med aktivitet)
+INSERT INTO daglig_forbrug VALUES
+(1, 1,  '2026-01-05', 30, 120, 200),
+(2, 5,  '2026-01-12', 14,   0,  30),
+(3, 6,  '2026-01-19', 14,   0,  30),
+(4, 7,  '2026-01-26',  8, 120, 200),
+(5, 8,  '2026-02-02',  8,   0, 200),
+(6, 9,  '2026-02-03',  8,   0, 200),
+(7, 10, '2026-02-10',  8,   0, 200),
+(8, 11, '2026-02-17',  8, 120, 200),
+(9, 12, '2026-02-24',  8, 120, 200),
+(10,15, '2026-02-05',  8, 120, 200),
+(11,16, '2026-02-19', 14,   0,  30),
+(12,13, '2026-03-03', 14,   0,  30),
+(13,14, '2026-03-10',  8,   0, 200),
+(14,17, '2026-03-01',  8,   0, 200);
 
 
 -- Trigger kode for lager 
+-- Ai was used in creation of this
 DELIMITER $$
 
 CREATE TRIGGER update_lager_after_transaktion
@@ -124,7 +160,7 @@ BEGIN
     DECLARE byttepenge100 INT DEFAULT 0;
     DECLARE byttepenge50 INT DEFAULT 0;
     DECLARE byttepenge20 INT DEFAULT 0;
-    DECLARE byttepenge10 INT DEFAULT 0;
+    DECLARE byttepenge10 INT DEFAULT 0;	 	
     DECLARE byttepenge5 INT DEFAULT 0;
     DECLARE byttepenge2 INT DEFAULT 0;
     DECLARE byttepenge1 INT DEFAULT 0;
