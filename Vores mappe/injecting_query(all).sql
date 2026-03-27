@@ -29,8 +29,17 @@ INSERT INTO opfyldning VALUES
 (4, 2, 0, 0, '2026-02-03', '10:06:51', 15, 0, 0, 0, 0, 0, 0, 0,);
 
 -- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = 0 fordi det kan gøres på en bedre måde, vi ikke har tid til
-INSERT INTO opfyldning VALUES 
-(1,1,2,1,40,'kort'.)
+
+
+INSERT INTO transaktion VALUES 
+-- Jens git - mange drinks få dage 
+(1,1,2,1,0,'26-01-01','5:06:51'), (2,1,1,1,0,'26-01-01','5:15:00'), (3,1,3,1,0,'26-01-01','5:15:50'),(4,1,1,1,0,'26-01-01','5:16:00'),
+(5,1,3,1,0,'25-12-24','23:50:51'), (6,1,3,1,0,'25-12-24','23:55:00'), (7,1,3,1,0,'25-12-24','23:56:50'),(8,1,3,1,0,'25-12-24','23:59:00'),
+-- Klawid Dasa 
+(9,2,1,1,0,'25-12-22','10:00:00') , (10,2,1,1,0,'25-12-26','10:00:00') , (11,2,1,1,0,'25-12-28','10:00:00') ,(12,2,1,1,0,'26-01-01','10:00:00') ,
+-- Donald Trump
+(9,2,1,1,0,'25-12-22','10:00:00') ;
+
 
 -- Rengøring
 INSERT INTO rengøring VALUES 
