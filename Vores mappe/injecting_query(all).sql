@@ -90,14 +90,21 @@ BEGIN
 
     -- Get ingredient usage from drink
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
-    INTO kaffe_used, mælk_used, kakao_used
+    INTO kaffe_used, mælk_used, vand_used
     FROM drink
-    WHERE id = NEW.drink_id;
+    WHERE drink_id = NEW.drink_id;
 
+-- Tjek om der er nok kaffe på lageret
 IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_used THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Not enough coffee in stock';
+    SET MESSAGE_TEXT = 'Ikke nok kaffe på lager';
 END IF;	
+
+ -- Tjek om der er nok mælk
+IF (SELECT mængde_mælk FROM lager WHERE lager_id = NEW.lager_id) < mælk_used THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Ikke nok mælk på lager';
+END IF;
 
     -- Update lager (assuming only one row with id = 1)
     UPDATE lager
@@ -162,7 +169,7 @@ BEGIN
         tidspunkt
     )
     VALUES (
-        (SELECT IFNULL(MAX(transakion_id)+1,1) FROM transaktion),
+        (SELECT IFNULL(MAX(transaktion_id)+1,1) FROM transaktion),
         p_medarbejder_id,
         p_drink_id,
         p_lager_id,

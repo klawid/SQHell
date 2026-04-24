@@ -6,7 +6,7 @@ navn char(25) not null,
 kaffe_forbrug_g int not null,
 mælk_forbrug_ml int not null, 
 vand_forbrug_ml int not null, 
-pris int not null, 
+drink_pris int not null, 
 primary key(drink_id)
 );
 
@@ -54,6 +54,7 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 CREATE TABLE lager(
     lager_id        int not null,
     opfyldning_id   int,				-- vi kan prøve at beholde den og se hvad der sker. 	
+    antal_200kr     int not null,
     antal_100kr     int not null,
     antal_50kr      int not null,
     antal_20kr      int not null,
