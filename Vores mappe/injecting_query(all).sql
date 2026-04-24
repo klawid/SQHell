@@ -90,9 +90,9 @@ BEGIN
 
     -- Get ingredient usage from drink
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
-    INTO kaffe_used, mælk_used, kakao_used
+    INTO kaffe_used, mælk_used, vand_used -- kakao => vand
     FROM drink
-    WHERE id = NEW.drink_id;
+    WHERE drink_id = NEW.drink_id; -- id => drink_id
 
 IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_used THEN
     SIGNAL SQLSTATE '45000'
