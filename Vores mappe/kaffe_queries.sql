@@ -31,11 +31,7 @@ SELECT transakion_id, ansat. navn, dato, tidspunkt, drink
 -- (ikke helt denne, men god at have med) Liste af alle transaktioner: Alle transaktioner indenfor af en bestemt person 
 
 
--- =====================================================================
--- 04_queries.sql
--- Demonstrationsqueries for kaffemaskine-databasen.
--- Opfylder de tre påkrævede queries fra opgavebeskrivelsen.
--- =====================================================================
+
 
 USE kaffemaskine;
 

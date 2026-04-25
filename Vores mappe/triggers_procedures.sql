@@ -75,7 +75,7 @@ BEGIN
     DECLARE v_next_id    INT;
 
     -- Hent pris
-    SELECT pris INTO v_pris
+    SELECT drink_pris INTO v_pris
       FROM drink
      WHERE drink_id = p_drink_id;
 
