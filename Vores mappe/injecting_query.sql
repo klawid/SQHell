@@ -12,6 +12,7 @@ INSERT INTO ansat VALUES
 (2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE),
 (3, 'Donald', 'Trump', 'President', 'The_trumping_man', 'xxBuild_great_wall_xd_xd', FALSE);
 
+
 -- Rengøring
 INSERT INTO rengøring VALUES 
 (1, 1, '2026-02-02'),
@@ -27,6 +28,10 @@ INSERT INTO rengøring VALUES
 -- INSERT INTO daglig_forbrug VALUES
 -- (1, 0,'2000-01-01', 0,0,0); 
 
+-- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
+-- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
+INSERT INTO lager VALUES
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 
 -- Opfyldning
@@ -37,12 +42,6 @@ INSERT INTO opfyldning VALUES
 (4, 2, 0, 0, '2026-02-03', '10:06:51', 15, 0, 0, 0, 0, 0, 0, 0);
 
 
-
-
--- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
--- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
-INSERT INTO lager VALUES
-(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 -- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = FALSE 
 -- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
