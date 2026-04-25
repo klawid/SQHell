@@ -1,4 +1,6 @@
-
+--=====================================================================================
+-- Update Lager After Transaktion
+--=====================================================================================
 
 -- Trigger kode for lager 
 -- Ai was used in creation of this
@@ -44,71 +46,104 @@ END$$
 DELIMITER ;
 
 
-DELIMITER //
+
+--=====================================================================================
+-- Køb Drink Funktion
+--=====================================================================================
+DROP PROCEDURE IF EXISTS køb_drink; --Udkommenter denne her når vi er færdige med at teste alting
+
+DELIMITER $$
 
 CREATE PROCEDURE køb_drink (
     IN p_medarbejder_id INT,
-    IN p_drink_id INT,
-    IN p_lager_id INT,
-    IN p_indbetaling INT,
-    IN p_betalingstype BOOL -- 0 = kort, 1 = kontant
+    IN p_drink_id       INT,
+    IN p_lager_id       INT,
+    IN p_betalingstype  BOOL,   -- 0 = kort, 1 = kontant
+    IN p_ind_200        INT,
+    IN p_ind_100        INT,
+    IN p_ind_50         INT,
+    IN p_ind_20         INT,
+    IN p_ind_10         INT,
+    IN p_ind_5          INT,
+    IN p_ind_2          INT,
+    IN p_ind_1          INT
 )
 BEGIN
-    DECLARE v_pris INT;
+    DECLARE v_pris       INT;
+    DECLARE v_indbetalt  INT;
     DECLARE v_byttepenge INT;
+    DECLARE v_next_id    INT;
 
-    -- hent pris
+    -- Hent pris
     SELECT pris INTO v_pris
-    FROM drink
-    WHERE drink_id = p_drink_id;
+      FROM drink
+     WHERE drink_id = p_drink_id;
 
-    -- 💳 KORT
-    IF p_betalingstype = 0 THEN
-        SET v_byttepenge = 0;
-        SET p_indbetaling = 0;
-
-    -- 💰 KONTANT
-    ELSE
-        IF p_indbetaling < v_pris THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
-        END IF;
-
-        SET v_byttepenge = p_indbetaling - v_pris;
-
-        -- 💡 HER kan du kalde din mønt-funktion
-        CALL beregn_byttepenge(v_byttepenge, p_lager_id);
+    IF v_pris IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ukendt drink';
     END IF;
 
-    -- indsæt transaktion
-    INSERT INTO transaktion (
-        transakion_id,
-        medarbejder_id,
-        drink_id,
-        lager_id,
-        kontant_indbetaling,
-        betalingstype,
-        byttepenge,
-        dato,
-        tidspunkt
-    )
-    VALUES (
-        (SELECT IFNULL(MAX(transaktion_id)+1,1) FROM transaktion),
+    IF p_betalingstype = 0 THEN
+        -- KORT: ingen kontanthåndtering
+        SET v_indbetalt  = 0;
+        SET v_byttepenge = 0;
+    ELSE
+        -- KONTANT: regn ud hvad kunden gav
+        SET v_indbetalt =
+              p_ind_200 * 200 + p_ind_100 * 100
+            + p_ind_50  *  50 + p_ind_20  *  20
+            + p_ind_10  *  10 + p_ind_5   *   5
+            + p_ind_2   *   2 + p_ind_1;
+
+        IF v_indbetalt < v_pris THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
+        END IF;
+
+        SET v_byttepenge = v_indbetalt - v_pris;
+
+        -- Læg kundens mønter i lageret
+        UPDATE lager
+           SET antal_200kr = antal_200kr + p_ind_200,
+               antal_100kr = antal_100kr + p_ind_100,
+               antal_50kr  = antal_50kr  + p_ind_50,
+               antal_20kr  = antal_20kr  + p_ind_20,
+               antal_10kr  = antal_10kr  + p_ind_10,
+               antal_5kr   = antal_5kr   + p_ind_5,
+               antal_2kr   = antal_2kr   + p_ind_2,
+               antal_1kr   = antal_1kr   + p_ind_1
+         WHERE lager_id = p_lager_id;
+
+        -- Dispensér byttepenge (procedure giver fejl hvis ikke muligt)
+        IF v_byttepenge > 0 THEN
+            CALL beregn_byttepenge(p_lager_id, v_byttepenge);
+        END IF;
+    END IF;
+
+    -- Find næste transaktions-ID
+    SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
+      FROM transaktion;
+
+    -- Indsæt transaktionen (trigger trækker ingredienser fra lager)
+    INSERT INTO transaktion VALUES (
+        v_next_id,
         p_medarbejder_id,
         p_drink_id,
         p_lager_id,
-        p_indbetaling,
+        v_indbetalt,
         p_betalingstype,
         v_byttepenge,
         CURRENT_DATE,
         CURRENT_TIME
     );
-
-END //
+END$$
 
 DELIMITER ;
 
 
+
+--=====================================================================================
+-- Beregn Byttepenge Funktion
+--=====================================================================================
 DELIMITER $$
 
 CREATE PROCEDURE beregn_byttepenge (
