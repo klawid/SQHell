@@ -8,4 +8,4 @@ USE kaffemaskine;
 
 SOURCE entities_setup.sql;
 SOURCE triggers_procedures.sql;
-SOURCE injection_query.sql;
+SOURCE injecting_query.sql;

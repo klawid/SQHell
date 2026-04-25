@@ -48,6 +48,33 @@ END$$
 DELIMITER ;
 
 
+--=====================================================================================
+-- Update Lager After Opfyldning
+--=====================================================================================
+
+DELIMITER $$
+
+CREATE TRIGGER update_lager_after_opfyldning
+AFTER INSERT ON opfyldning
+FOR EACH ROW
+BEGIN
+    UPDATE lager
+       SET mængde_kaffe  = mængde_kaffe  + NEW.opfyldning_kaffe_g,
+           mængde_mælk   = mængde_mælk   + NEW.opfyldning_mælk_ml,
+           antal_200kr   = antal_200kr   + NEW.opfyldning_200kr,
+           antal_100kr   = antal_100kr   + NEW.opfyldning_100kr,
+           antal_50kr    = antal_50kr    + NEW.opfyldning_50kr,
+           antal_20kr    = antal_20kr    + NEW.opfyldning_20kr,
+           antal_10kr    = antal_10kr    + NEW.opfyldning_10kr,
+           antal_5kr     = antal_5kr     + NEW.opfyldning_5kr,
+           antal_2kr     = antal_2kr     + NEW.opfyldning_2kr,
+           antal_1kr     = antal_1kr     + NEW.opfyldning_1kr,
+           opfyldning_id = NEW.opfyldning_id
+     WHERE lager_id = 1;
+END$$
+
+DELIMITER ;
+
 
 --=====================================================================================
 -- Beregn Byttepenge Funktion
