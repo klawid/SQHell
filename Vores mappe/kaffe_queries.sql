@@ -75,7 +75,7 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
 -- QUERY 2: Lagerstatus — nuværende beholdning
 -- ---------------------------------------------------------------------
 
--- 2a: Ingredienser (kaffe, mælk) med fyldningsgrad i procent
+-- 2a: Ingredienser (kaffe, mælk) med fyldningsgrad i procent		// er fyldnignsgrad i % vejen frem? Hvorfor gør vi det således.
 SELECT lager_id,
        mængde_kaffe,
        maks_kaffe,
@@ -93,6 +93,48 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr,
       + antal_10kr*10  + antal_5kr*5     + antal_2kr*2   + antal_1kr) AS kontant_sum_kr
   FROM lager
  WHERE lager_id = 1;
+
+
+-- 2b: Lager historik  = forbrug på en dag + opfyldninger? 
+
+SET @dato = '2026-02-05';
+
+SELECT
+    t.dato,
+    t.tidspunkt,
+    'Transaktion' AS hændelse,
+    t.transakion_id AS id,
+    d.mælk_forbrug_ml AS brugt_mælk,
+    d.kaffe_forbrug_g AS brugt_kaffe,
+    d.vand_forbrug_ml AS brugt_vand,
+    0 AS indsat_mælk,
+    0 AS indsat_kaffe,
+    0 AS indsat_vand
+FROM transaktion t
+JOIN drink d ON t.drink_id = d.drink_id
+WHERE t.dato = @dato
+
+UNION ALL
+
+SELECT
+    o.dato,
+    o.tidspunkt,
+    'Opfyldning' AS hændelse,
+    o.opfyldning_id AS id,
+    0 AS brugt_mælk,
+    0 AS brugt_kaffe,
+    0 AS brugt_vand,
+    o.opfyldning_mælk_ml AS indsat_mælk,
+    o.opfyldning_kaffe_g AS indsat_kaffe,
+    0 AS indsat_vand
+FROM opfyldning o
+WHERE o.dato = @dato
+
+ORDER BY tidspunkt;
+
+
+
+
 
 
 -- ---------------------------------------------------------------------
