@@ -15,9 +15,10 @@ SET @betalingstype  = NULL;
 SELECT t.transakion_id,
        t.dato,
        t.tidspunkt,
-       CONCAT(a.navn, ' ', a.efternavn)              AS medarbejder,
-       d.navn                                        AS drink,
-       d.drink_pris                                  AS pris,
+       a.navn 			AS fornavn,
+	   a.efternavn 		AS efternavn,
+       d.navn 			AS drink,
+       d.drink_pris     AS pris,
        CASE t.betalingstype WHEN 0 THEN 'Kort' ELSE 'Kontant' END AS betaling,
        t.kontant_indbetaling,
        t.byttepenge
@@ -36,7 +37,7 @@ SET @fra_dato       = '2026-02-01';
 SET @til_dato       = '2026-02-28';
 SET @drink_id       = NULL;
 SET @betalingstype  = NULL;
-
+	
 SELECT t.transakion_id, t.dato, t.tidspunkt,
        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
        d.navn AS drink, d.drink_pris,
@@ -99,7 +100,8 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr,
 -- ---------------------------------------------------------------------
 SELECT r.rengøring_id,
        r.dato,
-       CONCAT(a.navn, ' ', a.efternavn) AS udført_af,
+       a.navn AS fornavn,
+       a.efternavn AS efternavn, 
        a.stilling
   FROM rengøring r
   JOIN ansat a ON r.medarbejder_id = a.medarbejder_id
