@@ -112,40 +112,41 @@ foreign key (transakion_id) references transaktion(transakion_id)
 
 
 -- ================================================================================
--- Automation (Triggers og Procedures)
+-- Automatisk kode (Triggers og Procedures)
 -- ================================================================================
-
-
--- Update Lager After Transaktion
--- DROP PROCEDURE IF EXISTS update_lager_after_transaktion; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
-CREATE TRIGGER update_lager_after_transaktion
-AFTER INSERT ON transaktion
+CREATE TRIGGER update_lager_før_transaktion
+BEFORE INSERT ON transaktion
 FOR EACH ROW
 BEGIN
-    DECLARE kaffe_used INT;
-    DECLARE mælk_used INT;
-    DECLARE vand_used INT;
+    DECLARE kaffe_brugt INT;
+    DECLARE mælk_brugt INT;
+    DECLARE vand_brugt INT;
 
-    -- Get ingredient usage from drink
+    --  ingredient usage from drink
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
-    INTO kaffe_used, mælk_used, vand_used
+    INTO kaffe_brugt, mælk_brugt, vand_brugt
     FROM drink
     WHERE drink_id = NEW.drink_id;
 
 -- Tjek om der er nok kaffe på lageret
-IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_used THEN
+IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_brugt THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ikke nok kaffe på lager';
 END IF;	
 
  -- Tjek om der er nok mælk
-IF (SELECT mængde_mælk FROM lager WHERE lager_id = NEW.lager_id) < mælk_used THEN
+IF (SELECT mængde_mælk FROM lager WHERE lager_id = NEW.lager_id) < mælk_brugt THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ikke nok mælk på lager';
 END IF;
+
+-- noget med penge 
+-- if( byttepenge_burg_for) then 
+-- beregn_byttepenge(1,2); do this idk 
+
 
     -- Update lager (assuming only one row with id = 1)
     UPDATE lager
@@ -167,7 +168,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE TRIGGER update_lager_after_opfyldning
+CREATE TRIGGER update_lager_efter_opfyldning
 AFTER INSERT ON opfyldning
 FOR EACH ROW
 BEGIN
@@ -265,18 +266,18 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE køb_drink (
-    IN p_medarbejder_id INT,
-    IN p_drink_id       INT,
-    IN p_lager_id       INT,
-    IN p_betalingstype  BOOL,   -- 0 = kort, 1 = kontant
-    IN p_ind_200        INT,
-    IN p_ind_100        INT,
-    IN p_ind_50         INT,
-    IN p_ind_20         INT,
-    IN p_ind_10         INT,
-    IN p_ind_5          INT,
-    IN p_ind_2          INT,
-    IN p_ind_1          INT
+    IN ny_medarbejder_id INT,
+    IN ny_drink_id       INT,
+    IN ny_lager_id       INT,
+    IN ny_betalingstype  BOOL,   -- 0 = kort, 1 = kontant
+    IN ny_200        INT,
+    IN ny_100        INT,
+    IN ny_50         INT,
+    IN ny_20         INT,
+    IN ny_10         INT,
+    IN ny_5          INT,
+    IN ny_2          INT,
+    IN ny_1          INT
 )
 BEGIN
     DECLARE v_pris       INT;
@@ -287,60 +288,67 @@ BEGIN
     -- Hent pris
     SELECT drink_pris INTO v_pris
       FROM drink
-     WHERE drink_id = p_drink_id;
+     WHERE drink_id = ny_drink_id;
 
-    IF v_pris IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ukendt drink';
-    END IF;
+-- ---------------------------------------------------------------------
+-- 		Håntering af byttepenge
+-- ---------------------------------------------------------------------
 
-    IF p_betalingstype = 0 THEN
-        -- KORT: ingen kontanthåndtering
+    IF ny_betalingstype = 0 THEN	-- KORT: ingen kontanthåndtering
         SET v_indbetalt  = 0;
         SET v_byttepenge = 0;
     ELSE
         -- KONTANT: regn ud hvad kunden gav
         SET v_indbetalt =
-              p_ind_200 * 200 + p_ind_100 * 100
-            + p_ind_50  *  50 + p_ind_20  *  20
-            + p_ind_10  *  10 + p_ind_5   *   5
-            + p_ind_2   *   2 + p_ind_1;
+              ny_200*200 + ny_100*100  + ny_50*50 + ny_20*20  + ny_10*10 + ny_5*5 + ny_2*2 + ny_1;
 
-        IF v_indbetalt < v_pris THEN
+        IF v_indbetalt < v_pris THEN	
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
         END IF;
 
         SET v_byttepenge = v_indbetalt - v_pris;
 
-        -- Læg kundens mønter i lageret
-        UPDATE lager
-           SET antal_200kr = antal_200kr + p_ind_200,
-               antal_100kr = antal_100kr + p_ind_100,
-               antal_50kr  = antal_50kr  + p_ind_50,
-               antal_20kr  = antal_20kr  + p_ind_20,
-               antal_10kr  = antal_10kr  + p_ind_10,
-               antal_5kr   = antal_5kr   + p_ind_5,
-               antal_2kr   = antal_2kr   + p_ind_2,
-               antal_1kr   = antal_1kr   + p_ind_1
-         WHERE lager_id = p_lager_id;
+-- ---------------------------------------------------------------------
+-- 		Håntering af lager 
+-- ---------------------------------------------------------------------
 
-        -- Dispensér byttepenge (procedure giver fejl hvis ikke muligt)
+        -- Læg kundens mønter i lageret	
+        UPDATE lager
+           SET antal_200kr = antal_200kr + ny_200,
+               antal_100kr = antal_100kr + ny_100,
+               antal_50kr  = antal_50kr  + ny_50,
+               antal_20kr  = antal_20kr  + ny_20,
+               antal_10kr  = antal_10kr  + ny_10,
+               antal_5kr   = antal_5kr   + ind_5,
+               antal_2kr   = antal_2kr   + ny_2,
+               antal_1kr   = antal_1kr   + ny_1
+         WHERE lager_id = ny_lager_id;
+
+        -- Dispensér byttepenge (procedure giver fejl hvis ikke muligt)	
         IF v_byttepenge > 0 THEN
-            CALL beregn_byttepenge(p_lager_id, v_byttepenge);
+            CALL beregn_byttepenge(ny_lager_id, v_byttepenge);
         END IF;
     END IF;
 
+	
+    -- update af mælk + kaffe sker gennem en trigger før en transaktion dannes
+
+-- ---------------------------------------------------------------------
+-- 		Dannelse af ny transaktion 
+-- ---------------------------------------------------------------------
+
     -- Find næste transaktions-ID
-    SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
+    SELECT MAX(transakion_id) + 1 INTO v_next_id		
       FROM transaktion;
 
     -- Indsæt transaktionen (trigger trækker ingredienser fra lager)
     INSERT INTO transaktion VALUES (
         v_next_id,
-        p_medarbejder_id,
-        p_drink_id,
-        p_lager_id,
+        ny_medarbejder_id,
+        ny_drink_id,
+        ny_lager_id,
         v_indbetalt,
-        p_betalingstype,
+        ny_betalingstype,
         v_byttepenge,
         CURRENT_DATE,
         CURRENT_TIME
@@ -353,8 +361,8 @@ DELIMITER ;
 -- ================================================================================
 -- Injections
 -- ================================================================================
-
 -- Drinks 
+-- Kolonner: drink_id, navn, kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml, drink_pris
 INSERT INTO drink VALUES 
 (1,'Americano',30 , 0, 330, 25) , 
 (2,'Cappuccino', 30, 150, 150, 30) , 
@@ -362,13 +370,15 @@ INSERT INTO drink VALUES
 
 
 -- Ansatte
+-- Kolonner: medarbejder_id, navn, efternavn, stilling, brugernavn, kodeord, adgangstilladelse
 INSERT INTO ansat VALUES
 (1, 'Jens','Git','Arbejdsdreng', 'JeGi', 'kodeord123', FALSE),
-(2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE),
+(2, 'Klawid', 'Dasa', 'Cheese Wizard', 'KlDa', 'JegErSej1', TRUE), -- Har adgang til at opfylde og rengøre
 (3, 'Donald', 'Trump', 'President', 'The_trumping_man', 'xxBuild_great_wall_xd_xd', FALSE);
 
 
--- Rengøring
+-- Rengøringsdatoer og medarbejder der har rengjort
+-- Kolonner: rengøring_id, medarbejder_id, dato
 INSERT INTO rengøring VALUES 
 (1, 1, '2026-02-02'),
 (2, 1, '2026-02-09'),
@@ -377,34 +387,25 @@ INSERT INTO rengøring VALUES
 (5, 1, '2026-03-02');
 
 
-
--- Daglig forbrug - samme som lager.
--- Denne kode funger ikke: Det er noget der skal DANNES I KAFFEDDL 
--- INSERT INTO daglig_forbrug VALUES
--- (1, 0,'2000-01-01', 0,0,0); 
-
--- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
--- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
-INSERT INTO lager VALUES
-(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4000, 4000);
-
-
 -- Opfyldning
+-- Kolonner: opfyldning_id, medarbejder_id, opfyldning_kaffe_g, opfyldning_mælk_ml, dato, tidspunkt, opfyldning_xkr ... opfuldning_ykr
 INSERT INTO opfyldning VALUES 
 (1, 2, 2000, 500, '2026-02-01', '14:36:00', 20, 10, 10, 30, 30, 50, 100, 100),
-(2, 2, 500, 1000, '2026-02-02', '13:15:16', 0, 1, 0, 5, 2, 10, 20, 20),
-(3, 2, 0, 0, '2026-02-03', '00:41:10', -10, -5, -5, -3, 0, 0, 0, 0),
-(4, 2, 0, 0, '2026-02-03', '10:06:51', 12, 7, 7, 5, 0, 0, 0, 0);
+(2, 2, 500, 1000, '2026-02-28', '13:15:16', 0, 1, 0, 5, 2, 10, 20, 20),
+(3, 2, 0, 0, '2026-02-03', '00:41:10', -10, -5, -5, -3, 0, 0, 0, 0), -- Klawid har stjålet penge fra kassen
+(4, 2, 0, 0, '2026-02-03', '10:06:51', 12, 7, 7, 5, 0, 0, 0, 0),
+(5, 2, 1000, 200, '2026-02-05', '5:16:51', 0, 0, 0, 0, 0, 0, 0, 0);
 
 
+-- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
+-- Kolonner: lager_id, opfyldning_id, antal_xkr ... antal_ykr, mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
+INSERT INTO lager VALUES
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
--- transaktion	- Regl: Når kort anvendes, sættes "indbetaling" = FALSE 
--- Kolonner: id, medarbejder_id, drink_id, lager_id, indbetaling, betalingstype, byttepenge, dato, tidspunkt
 
--- transaktion	- Regl: Når kort anvendes, sættes "kontant_indbetaling" = 0 
--- Kolonner: id, medarbejder_id, drink_id, lager_id, kontant_indbetaling, betalingstype, byttepenge, dato, tidspunkt
-
--- betalingstype: 0 = kort, 1 = kontant
+-- Transaktioner
+-- Regl: Når kort anvendes, sættes "kontant_indbetaling" = 0. Betalingstype: 0 = kort, 1 = kontant
+-- Kolonner: transaktion_id, medarbejder_id, drink_id, lager_id, kontant_indbetaling, betalingstype, byttepenge, dato, tidspunkt
 INSERT INTO transaktion VALUES
 -- Jens Git – tidlige morgenvagter i Februar
 (2,  1, 2, 1,  0,  0, 0, '2026-02-05', '05:06:51'),
@@ -427,4 +428,5 @@ INSERT INTO transaktion VALUES
 (11, 3, 3, 1,  200, 1, 165, '2026-02-19', '09:00:00'),
 (14, 3, 1, 1,  0,  0, 0, '2026-03-01', '11:00:00');
 
--- Når du er nået hertil, så skulle databasen gerne være korrekt sat op.
+
+-- Nå du er nået hertil, burde databasen gerne være sat korrekt op 

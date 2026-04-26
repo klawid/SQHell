@@ -95,7 +95,7 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr,
  WHERE lager_id = 1;
 
 
--- 2b: Lager historik  = forbrug på en dag + opfyldninger? 
+-- 2c: lagerhistorik: Forbruget på en dag + opfyldning
 
 SET @dato = '2026-02-05';
 
@@ -108,8 +108,7 @@ SELECT
     d.kaffe_forbrug_g AS brugt_kaffe,
     d.vand_forbrug_ml AS brugt_vand,
     0 AS indsat_mælk,
-    0 AS indsat_kaffe,
-    0 AS indsat_vand
+    0 AS indsat_kaffe
 FROM transaktion t
 JOIN drink d ON t.drink_id = d.drink_id
 WHERE t.dato = @dato
@@ -125,14 +124,11 @@ SELECT
     0 AS brugt_kaffe,
     0 AS brugt_vand,
     o.opfyldning_mælk_ml AS indsat_mælk,
-    o.opfyldning_kaffe_g AS indsat_kaffe,
-    0 AS indsat_vand
+    o.opfyldning_kaffe_g AS indsat_kaffe
 FROM opfyldning o
 WHERE o.dato = @dato
 
 ORDER BY tidspunkt;
-
-
 
 
 
