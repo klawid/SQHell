@@ -7,10 +7,10 @@
 -- ---------------------------------------------------------------------
 
 -- EKSEMPEL 1a: ALLE transaktioner (ingen filtre)
-SET @fra_dato       = NULL;
-SET @til_dato       = NULL;
-SET @drink_id       = NULL;
-SET @betalingstype  = NULL;
+SET @fra_dato       = NULL, 
+@til_dato       = NULL, 
+@drink_id       = NULL, 
+@betalingstype  = NULL;
 
 SELECT t.transakion_id,
        t.dato,
@@ -33,10 +33,10 @@ SELECT t.transakion_id,
 
 
 -- EKSEMPEL 1b: Kun transaktioner i februar 2026
-SET @fra_dato       = '2026-02-01';
-SET @til_dato       = '2026-02-28';
-SET @drink_id       = NULL;
-SET @betalingstype  = NULL;
+SET @fra_dato       = '2026-02-01' ,
+	@til_dato       = '2026-02-28',
+	@drink_id       = NULL,
+	@betalingstype  = NULL;
 	
 SELECT t.transakion_id, t.dato, t.tidspunkt,
        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
@@ -53,10 +53,10 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
 
 
 -- EKSEMPEL 1c: Kun kontante espresso-køb (drink_id = 3, betalingstype = 1)
-SET @fra_dato       = NULL;
-SET @til_dato       = NULL;
-SET @drink_id       = 3;
-SET @betalingstype  = 1;
+SET @fra_dato       = NULL,
+ @til_dato       = NULL,
+@drink_id       = 3,
+@betalingstype  = 1;
 
 SELECT t.transakion_id, t.dato, t.tidspunkt,
        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
@@ -102,7 +102,7 @@ SELECT r.rengøring_id,
        r.dato,
        a.navn AS fornavn,
        a.efternavn AS efternavn, 
-       a.stilling
+       a.stilling	
   FROM rengøring r
   JOIN ansat a ON r.medarbejder_id = a.medarbejder_id
  ORDER BY r.dato;
