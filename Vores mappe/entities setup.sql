@@ -1,4 +1,6 @@
--- Laver lige drinks after
+-- ================================================================================
+-- Opsætning af entities i databasen
+-- ================================================================================
 
 CREATE TABLE drink(
 drink_id int not null, 
@@ -21,7 +23,6 @@ adgangstilladelse bool not null,
 primary key(medarbejder_id)
 );
 
-
 CREATE TABLE rengøring(
 rengøring_id 		int not null,
 medarbejder_id		int not null,
@@ -29,7 +30,6 @@ dato	 			date not null,
 primary key(rengøring_id),
 foreign key (medarbejder_id) references ansat(medarbejder_id)
 );
-
 
 CREATE TABLE opfyldning(
 opfyldning_id 			int not null,
@@ -53,7 +53,7 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 
 CREATE TABLE lager(
     lager_id        int not null,
-    opfyldning_id   int,				-- vi kan prøve at beholde den og se hvad der sker. 	
+    opfyldning_id   int,				
     antal_200kr     int not null,
     antal_100kr     int not null,
     antal_50kr      int not null,

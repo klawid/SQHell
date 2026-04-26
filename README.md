@@ -1,5 +1,3 @@
-# SQHell
+Formålet med denne fil er at forklare, hvordan vi gerne vil have databasen vist.
 
-Actually don't read this. Never read this. 
-If you are here, you have clicked wrong and should click somewhere else.
-  
+1. 
