@@ -184,3 +184,21 @@ CALL opfyld_lager_login(
 
 -- 4c: Ingen adgang til at opfylde lageret
 CALL opfyld_lager_login('JeGi', 'kodeord123', 1, 500, 200, 0,0,0,0,0,0,0,0);
+
+-- =====================================================================
+-- Test Koder
+-- Brug disse til at prøve at teste databasen med - Hvis du altså synes det er en sjov ting at bruge sit liv på
+-- =====================================================================
+
+
+-- Beregn Byttepenge test
+-- Du kan taste denne ind for at prøve at se om beregn_byttepenge virker.
+-- Det første tal er lager_id, og for nu er der kun ét ID, så den skal bare være 1.
+-- Det andet tal er til mængden af byttepenge du skal have tilbage. 
+-- Der er to selects, så du kan se antallet af hver denomination af kronerne, både før og efter.
+SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, antal_2kr, antal_1kr FROM lager WHERE lager_id = 1;
+CALL beregn_byttepenge(1, 165);
+SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, antal_2kr, antal_1kr FROM lager WHERE lager_id = 1;
+
+
+
