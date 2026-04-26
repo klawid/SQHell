@@ -1,10 +1,10 @@
---=====================================================================================
+-- =====================================================================================
 -- Update Lager After Transaktion
---=====================================================================================
+-- =====================================================================================
 
 -- Trigger kode for lager 
 -- Ai was used in creation of this
---DROP PROCEDURE IF EXISTS update_lager_after_transaktion; --Udkommenter denne her når vi er færdige med at teste alting
+-- DROP PROCEDURE IF EXISTS update_lager_after_transaktion; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -48,9 +48,10 @@ END$$
 DELIMITER ;
 
 
---=====================================================================================
+-- =====================================================================================
 -- Update Lager After Opfyldning
---=====================================================================================
+-- =====================================================================================
+-- DROP PROCEDURE IF EXISTS update_lager_after_opfyldning; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -76,10 +77,10 @@ END$$
 DELIMITER ;
 
 
---=====================================================================================
+-- =====================================================================================
 -- Beregn Byttepenge Funktion
---=====================================================================================
---DROP PROCEDURE IF EXISTS beregn_byttepenge; --Udkommenter denne her når vi er færdige med at teste alting
+-- =====================================================================================
+-- DROP PROCEDURE IF EXISTS beregn_byttepenge; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -148,10 +149,10 @@ DELIMITER ;
 
 
 
---=====================================================================================
+-- =====================================================================================
 -- Køb Drink Funktion
---=====================================================================================
---DROP PROCEDURE IF EXISTS køb_drink; --Udkommenter denne her når vi er færdige med at teste alting
+-- =====================================================================================
+-- DROP PROCEDURE IF EXISTS køb_drink; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
