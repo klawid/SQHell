@@ -46,6 +46,79 @@ END$$
 
 DELIMITER ;
 
+-- =====================================================================================
+-- Check adgang for opfyldning
+-- =====================================================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE opfyld_lager_login (
+    IN p_brugernavn VARCHAR(25),
+    IN p_kodeord VARCHAR(25),
+    IN p_lager_id INT,
+    IN p_kaffe INT,
+    IN p_mælk INT,
+    IN p_200 INT,
+    IN p_100 INT,
+    IN p_50 INT,
+    IN p_20 INT,
+    IN p_10 INT,
+    IN p_5 INT,
+    IN p_2 INT,
+    IN p_1 INT
+)
+BEGIN
+    DECLARE v_medarbejder_id INT;
+    DECLARE v_kodeord VARCHAR(25);
+    DECLARE v_adgang BOOL;
+    DECLARE v_next_id INT;
+
+    -- 1. Find bruger
+    SELECT medarbejder_id, kodeord, adgangstilladelse
+    INTO v_medarbejder_id, v_kodeord, v_adgang
+    FROM ansat
+    WHERE brugernavn = p_brugernavn;
+
+    -- 2. Check bruger findes
+    IF v_medarbejder_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bruger findes ikke';
+    END IF;
+
+    -- 3. Check kodeord
+    IF v_kodeord != p_kodeord THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Forkert kodeord';
+    END IF;
+
+    -- 4. Check adgang
+    IF v_adgang = FALSE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ingen adgang til opfyldning';
+    END IF;
+
+    -- 5. Generer ID
+    SELECT IFNULL(MAX(opfyldning_id),0)+1 INTO v_next_id
+    FROM opfyldning;
+
+    -- 6. Indsæt opfyldning
+    INSERT INTO opfyldning VALUES (
+        v_next_id,
+        v_medarbejder_id,
+        p_lager_id,
+        p_kaffe,
+        p_mælk,
+        CURRENT_DATE,
+        CURRENT_TIME,
+        p_200, p_100, p_50, p_20,
+        p_10, p_5, p_2, p_1
+    );
+
+    -- 7. AFTER trigger opdaterer lager automatisk
+
+END$$
+
+DELIMITER ;
 
 -- =====================================================================================
 -- Update Lager After Opfyldning
@@ -290,6 +363,65 @@ BEGIN
             sum_vand  = sum_vand  + vand_used
         WHERE dato = NEW.dato;
     END IF;
+
+END$$
+
+DELIMITER ;
+
+-- =====================================================================================
+-- Check adgang og logføring af rengøring
+-- =====================================================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE rengør_maskine (
+    IN p_brugernavn VARCHAR(25),
+    IN p_kodeord VARCHAR(25)
+)
+BEGIN
+    DECLARE v_medarbejder_id INT;
+    DECLARE v_kodeord VARCHAR(25);
+    DECLARE v_adgang BOOL;
+    DECLARE v_next_id INT;
+
+    -- 1. Find user
+    SELECT medarbejder_id, kodeord, adgangstilladelse
+    INTO v_medarbejder_id, v_kodeord, v_adgang
+    FROM ansat
+    WHERE brugernavn = p_brugernavn;
+
+    -- 2. Check user exists
+    IF v_medarbejder_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bruger findes ikke';
+    END IF;
+
+    -- 3. Check password
+    IF v_kodeord != p_kodeord THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Forkert kodeord';
+    END IF;
+
+    -- 4. Check permission
+    IF v_adgang = FALSE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ingen adgang til rengøring';
+    END IF;
+
+    -- 5. Insert cleaning log
+    SELECT IFNULL(MAX(rengøring_id),0)+1 INTO v_next_id
+    FROM rengøring;
+
+    INSERT INTO rengøring (
+        rengøring_id,
+        medarbejder_id,
+        dato
+    )
+    VALUES (
+        v_next_id,
+        v_medarbejder_id,
+        CURRENT_DATE
+    );
 
 END$$
 
