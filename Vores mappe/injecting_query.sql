@@ -31,7 +31,7 @@ INSERT INTO rengøring VALUES
 -- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
 -- Bemærk: opfyldning_id skal være NULL her, så fjern NOT NULL på den kolonne i CREATE TABLE
 INSERT INTO lager VALUES
-(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 
 -- Opfyldning
