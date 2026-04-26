@@ -140,6 +140,8 @@ ORDER BY tidspunkt;
 -- ---------------------------------------------------------------------
 -- QUERY 3: Rengøringshistorik
 -- ---------------------------------------------------------------------
+
+-- 3a: Alle rengøringer med dato og medarbejder
 SELECT r.rengøring_id,
        r.dato,
        a.navn AS fornavn,
@@ -149,5 +151,36 @@ SELECT r.rengøring_id,
   JOIN ansat a ON r.medarbejder_id = a.medarbejder_id
  ORDER BY r.dato;
 
+-- 3b: Indsæt en rengøring korrekt
+CALL rengør_maskine('KlDa', 'JegErSej1');
 
 
+-- ---------------------------------------------------------------------
+-- QUERY 4: Opfyldningshistorik
+-- ---------------------------------------------------------------------
+
+-- 4a: Alle opfyldninger
+SELECT o.opfyldning_id,
+        o.dato,
+        o.tidspunkt,
+        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
+        o.opfyldning_kaffe_g,
+        o.opfyldning_mælk_ml,
+        o.opfyldning_200kr, o.opfyldning_100kr, o.opfyldning_50kr, o.opfyldning_20kr,
+        o.opfyldning_10kr,  o.opfyldning_5kr,   o.opfyldning_2kr,  o.opfyldning_1kr
+    FROM opfyldning o
+    JOIN ansat a ON o.medarbejder_id = a.medarbejder_id
+  ORDER BY o.dato, o.tidspunkt;
+
+-- 4b: Indsæt en opfyldning korrekt
+CALL opfyld_lager_login(
+    'KlDa',        -- brugernavn
+    'JegErSej1',   -- kodeord
+    1,             -- lager_id
+    500,           -- kaffe
+    200,           -- mælk
+    1,0,0,0,0,0,0,0
+);
+
+-- 4c: Ingen adgang til at opfylde lageret
+CALL opfyld_lager_login('JeGi', 'kodeord123', 1, 500, 200, 0,0,0,0,0,0,0,0);
