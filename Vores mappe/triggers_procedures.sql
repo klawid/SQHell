@@ -4,7 +4,6 @@
 
 -- Trigger kode for lager 
 -- Ai was used in creation of this
--- DROP PROCEDURE IF EXISTS update_lager_after_transaktion; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -16,7 +15,7 @@ BEGIN
     DECLARE mælk_used INT;
     DECLARE vand_used INT;
 
-    -- Get ingredient usage from drink
+    -- Få ingredient fra "drink"
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
     INTO kaffe_used, mælk_used, vand_used
     FROM drink
@@ -51,7 +50,6 @@ DELIMITER ;
 -- =====================================================================================
 -- Update Lager After Opfyldning
 -- =====================================================================================
--- DROP PROCEDURE IF EXISTS update_lager_after_opfyldning; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -80,7 +78,6 @@ DELIMITER ;
 -- =====================================================================================
 -- Beregn Byttepenge Funktion
 -- =====================================================================================
--- DROP PROCEDURE IF EXISTS beregn_byttepenge; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -152,7 +149,6 @@ DELIMITER ;
 -- =====================================================================================
 -- Køb Drink Funktion
 -- =====================================================================================
--- DROP PROCEDURE IF EXISTS køb_drink; -- Udkommenter denne her når vi er færdige med at teste alting
 
 DELIMITER $$
 
@@ -222,7 +218,8 @@ BEGIN
     END IF;
 
     -- Find næste transaktions-ID
-    SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
+    
+     SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
       FROM transaktion;
 
     -- Indsæt transaktionen (trigger trækker ingredienser fra lager)
