@@ -20,6 +20,7 @@ drink_pris int not null,
 primary key(drink_id)
 );
 
+
 CREATE TABLE ansat(
 medarbejder_id int not null,
 navn		char(25) not null,

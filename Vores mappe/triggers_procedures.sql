@@ -237,3 +237,60 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+-- =====================================================================================
+-- Opdater Daglig Forbrug Funktion
+-- =====================================================================================
+
+DELIMITER $$
+
+CREATE TRIGGER update_daglig_forbrug
+AFTER INSERT ON transaktion
+FOR EACH ROW
+BEGIN
+    DECLARE kaffe_used INT;
+    DECLARE mælk_used INT;
+    DECLARE vand_used INT;
+    DECLARE v_exists INT;
+
+    -- Get usage from drink
+    SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
+    INTO kaffe_used, mælk_used, vand_used
+    FROM drink
+    WHERE drink_id = NEW.drink_id;
+
+    -- Check if a row for this date already exists
+    SELECT COUNT(*) INTO v_exists
+    FROM daglig_forbrug
+    WHERE dato = NEW.dato;
+
+    IF v_exists = 0 THEN
+        -- Insert new row
+        INSERT INTO daglig_forbrug (
+            forbrug_id,
+            dato,
+            sum_kaffe,
+            sum_mælk,
+            sum_vand
+        )
+        VALUES (
+            (SELECT IFNULL(MAX(forbrug_id),0)+1 FROM daglig_forbrug),
+            NEW.dato,
+            kaffe_used,
+            mælk_used,
+            vand_used
+        );
+    ELSE
+        -- Update existing row
+        UPDATE daglig_forbrug
+        SET 
+            sum_kaffe = sum_kaffe + kaffe_used,
+            sum_mælk  = sum_mælk  + mælk_used,
+            sum_vand  = sum_vand  + vand_used
+        WHERE dato = NEW.dato;
+    END IF;
+
+END$$
+
+DELIMITER ;
