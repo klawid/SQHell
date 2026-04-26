@@ -6,7 +6,7 @@
 -- Eksemplerne nedenfor demonstrerer forskellige kombinationer.
 -- ---------------------------------------------------------------------
 
--- EKSEMPEL 1a: ALLE transaktioner (ingen filtre)
+-- EKSEMPEL 1a: ALLE transaktioner (general test)
 SET @fra_dato       = NULL, 
 @til_dato       = NULL, 
 @drink_id       = NULL, 
@@ -32,9 +32,9 @@ SELECT t.transakion_id,
  ORDER BY t.dato, t.tidspunkt;
 
 
--- EKSEMPEL 1b: Kun transaktioner i februar 2026
+-- EKSEMPEL 1b: Kun transaktioner i fra februar 1 til feb 15 (2026)
 SET @fra_dato       = '2026-02-01' ,
-	@til_dato       = '2026-02-28',
+	@til_dato       = '2026-02-15',
 	@drink_id       = NULL,
 	@betalingstype  = NULL;
 	
@@ -54,7 +54,7 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
 
 -- EKSEMPEL 1c: Kun kontante espresso-køb (drink_id = 3, betalingstype = 1)
 SET @fra_dato       = NULL,
- @til_dato       = NULL,
+@til_dato       = NULL,
 @drink_id       = 3,
 @betalingstype  = 1;
 
