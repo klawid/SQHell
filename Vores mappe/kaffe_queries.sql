@@ -154,6 +154,14 @@ SELECT r.rengøring_id,
 -- 3b: Indsæt en rengøring korrekt
 CALL rengør_maskine('KlDa', 'JegErSej1');
 
+-- 3c: Ingen adgang til at rengøre
+CaLL rengør_maskine('JeGi', 'kodeord123');
+
+-- 3d: Forkert kodeord
+CALL rengør_maskine('KlDa', 'forkert');
+
+-- 3e: Forkert brugernavn
+CaLL rengør_maskine('unknown', '123');
 
 -- ---------------------------------------------------------------------
 -- QUERY 4: Opfyldningshistorik
@@ -184,6 +192,12 @@ CALL opfyld_lager_login(
 
 -- 4c: Ingen adgang til at opfylde lageret
 CALL opfyld_lager_login('JeGi', 'kodeord123', 1, 500, 200, 0,0,0,0,0,0,0,0);
+
+-- 4d: Forkert kodeord
+CALL opfyld_lager_login('KlDa', 'forkert', 1, 500, 200, 0,0,0,0,0,0,0,0);
+
+-- 4e: Forkert brugernavn
+CALL opfyld_lager_login('unknown', '123', 1, 500, 200, 0,0,0,0,0,0,0,0);
 
 -- =====================================================================
 -- Test Koder
