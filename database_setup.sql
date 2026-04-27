@@ -20,7 +20,6 @@ drink_pris int not null,
 primary key(drink_id)
 );
 
-
 CREATE TABLE ansat(
 medarbejder_id int not null,
 navn		char(25) not null,
@@ -32,7 +31,6 @@ adgangstilladelse bool not null,
 primary key(medarbejder_id)
 );
 
-
 CREATE TABLE rengøring(
 rengøring_id 		int not null,
 medarbejder_id		int not null,
@@ -40,7 +38,6 @@ dato	 			date not null,
 primary key(rengøring_id),
 foreign key (medarbejder_id) references ansat(medarbejder_id)
 );
-
 
 CREATE TABLE opfyldning(
 opfyldning_id 			int not null,
@@ -64,7 +61,7 @@ foreign key (medarbejder_id) references ansat(medarbejder_id)
 
 CREATE TABLE lager(
     lager_id        int not null,
-    opfyldning_id   int,				-- vi kan prøve at beholde den og se hvad der sker. 	
+    opfyldning_id   int,				
     antal_200kr     int not null,
     antal_100kr     int not null,
     antal_50kr      int not null,
@@ -110,11 +107,16 @@ foreign key (transakion_id) references transaktion(transakion_id)
 
 
 
-
 -- ================================================================================
 -- Automatisk kode (Triggers og Procedures)
 -- ================================================================================
 
+-- -------------------------------------------------------------------------------------
+-- Update Lager After Transaktion
+-- -------------------------------------------------------------------------------------
+
+-- Trigger kode for lager 
+-- Ai was used in creation of this
 DELIMITER $$
 
 CREATE TRIGGER update_lager_før_transaktion
@@ -160,15 +162,87 @@ END IF;
 END$$
 
 DELIMITER ;
-
-
-
--- Update Lager After Opfyldning
--- DROP PROCEDURE IF EXISTS update_lager_after_opfyldning; -- Udkommenter denne her når vi er færdige med at teste alting
+-- -------------------------------------------------------------------------------------
+-- Check adgang for opfyldning
+-- -------------------------------------------------------------------------------------
 
 DELIMITER $$
 
-CREATE TRIGGER update_lager_efter_opfyldning
+CREATE PROCEDURE opfyld_lager_login (
+    IN p_brugernavn VARCHAR(25),
+    IN p_kodeord VARCHAR(25),
+    IN p_lager_id INT,
+    IN p_kaffe INT,
+    IN p_mælk INT,
+    IN p_200 INT,
+    IN p_100 INT,
+    IN p_50 INT,
+    IN p_20 INT,
+    IN p_10 INT,
+    IN p_5 INT,
+    IN p_2 INT,
+    IN p_1 INT
+)
+BEGIN
+    DECLARE v_medarbejder_id INT;
+    DECLARE v_kodeord VARCHAR(25);
+    DECLARE v_adgang BOOL;
+    DECLARE v_next_id INT;
+
+    -- 1. Find bruger
+    SELECT medarbejder_id, kodeord, adgangstilladelse
+    INTO v_medarbejder_id, v_kodeord, v_adgang
+    FROM ansat
+    WHERE brugernavn = p_brugernavn;
+
+    -- 2. Check bruger findes
+    IF v_medarbejder_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bruger findes ikke';
+    END IF;
+
+    -- 3. Check kodeord
+    IF v_kodeord != p_kodeord THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Forkert kodeord';
+    END IF;
+
+    -- 4. Check adgang
+    IF v_adgang = FALSE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ingen adgang til opfyldning';
+    END IF;
+
+    -- 5. Generer ID
+    SELECT IFNULL(MAX(opfyldning_id),0)+1 INTO v_next_id
+    FROM opfyldning;
+
+    -- 6. Indsæt opfyldning
+    INSERT INTO opfyldning VALUES (
+        v_next_id,
+        v_medarbejder_id,
+        p_lager_id,
+        p_kaffe,
+        p_mælk,
+        CURRENT_DATE,
+        CURRENT_TIME,
+        p_200, p_100, p_50, p_20,
+        p_10, p_5, p_2, p_1
+    );
+
+    -- 7. AFTER trigger opdaterer lager automatisk
+
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------------------------------------
+-- Update Lager After Opfyldning
+-- -------------------------------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE TRIGGER update_lager_after_opfyldning
 AFTER INSERT ON opfyldning
 FOR EACH ROW
 BEGIN
@@ -190,8 +264,9 @@ END$$
 DELIMITER ;
 
 
+-- -------------------------------------------------------------------------------------
 -- Beregn Byttepenge Funktion
--- DROP PROCEDURE IF EXISTS beregn_byttepenge; -- Udkommenter denne her når vi er færdige med at teste alting
+-- -------------------------------------------------------------------------------------
 
 DELIMITER $$
 
@@ -260,24 +335,25 @@ DELIMITER ;
 
 
 
+-- -------------------------------------------------------------------------------------
 -- Køb Drink Funktion
--- DROP PROCEDURE IF EXISTS køb_drink; -- Udkommenter denne her når vi er færdige med at teste alting
+-- -------------------------------------------------------------------------------------
 
 DELIMITER $$
 
 CREATE PROCEDURE køb_drink (
-    IN ny_medarbejder_id INT,
-    IN ny_drink_id       INT,
-    IN ny_lager_id       INT,
-    IN ny_betalingstype  BOOL,   -- 0 = kort, 1 = kontant
-    IN ny_200        INT,
-    IN ny_100        INT,
-    IN ny_50         INT,
-    IN ny_20         INT,
-    IN ny_10         INT,
-    IN ny_5          INT,
-    IN ny_2          INT,
-    IN ny_1          INT
+    IN p_medarbejder_id INT,
+    IN p_drink_id       INT,
+    IN p_lager_id       INT,
+    IN p_betalingstype  BOOL,   -- 0 = kort, 1 = kontant
+    IN p_ind_200        INT,
+    IN p_ind_100        INT,
+    IN p_ind_50         INT,
+    IN p_ind_20         INT,
+    IN p_ind_10         INT,
+    IN p_ind_5          INT,
+    IN p_ind_2          INT,
+    IN p_ind_1          INT
 )
 BEGIN
     DECLARE v_pris       INT;
@@ -288,71 +364,181 @@ BEGIN
     -- Hent pris
     SELECT drink_pris INTO v_pris
       FROM drink
-     WHERE drink_id = ny_drink_id;
+     WHERE drink_id = p_drink_id;
 
--- ---------------------------------------------------------------------
--- 		Håntering af byttepenge
--- ---------------------------------------------------------------------
+    IF v_pris IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ukendt drink';
+    END IF;
 
-    IF ny_betalingstype = 0 THEN	-- KORT: ingen kontanthåndtering
+    IF p_betalingstype = 0 THEN
+        -- KORT: ingen kontanthåndtering
         SET v_indbetalt  = 0;
         SET v_byttepenge = 0;
     ELSE
         -- KONTANT: regn ud hvad kunden gav
         SET v_indbetalt =
-              ny_200*200 + ny_100*100  + ny_50*50 + ny_20*20  + ny_10*10 + ny_5*5 + ny_2*2 + ny_1;
+              p_ind_200 * 200 + p_ind_100 * 100
+            + p_ind_50  *  50 + p_ind_20  *  20
+            + p_ind_10  *  10 + p_ind_5   *   5
+            + p_ind_2   *   2 + p_ind_1;
 
-        IF v_indbetalt < v_pris THEN	
+        IF v_indbetalt < v_pris THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ikke nok penge indbetalt';
         END IF;
 
         SET v_byttepenge = v_indbetalt - v_pris;
 
--- ---------------------------------------------------------------------
--- 		Håntering af lager 
--- ---------------------------------------------------------------------
-
-        -- Læg kundens mønter i lageret	
+        -- Læg kundens mønter i lageret
         UPDATE lager
-           SET antal_200kr = antal_200kr + ny_200,
-               antal_100kr = antal_100kr + ny_100,
-               antal_50kr  = antal_50kr  + ny_50,
-               antal_20kr  = antal_20kr  + ny_20,
-               antal_10kr  = antal_10kr  + ny_10,
-               antal_5kr   = antal_5kr   + ind_5,
-               antal_2kr   = antal_2kr   + ny_2,
-               antal_1kr   = antal_1kr   + ny_1
-         WHERE lager_id = ny_lager_id;
+           SET antal_200kr = antal_200kr + p_ind_200,
+               antal_100kr = antal_100kr + p_ind_100,
+               antal_50kr  = antal_50kr  + p_ind_50,
+               antal_20kr  = antal_20kr  + p_ind_20,
+               antal_10kr  = antal_10kr  + p_ind_10,
+               antal_5kr   = antal_5kr   + p_ind_5,
+               antal_2kr   = antal_2kr   + p_ind_2,
+               antal_1kr   = antal_1kr   + p_ind_1
+         WHERE lager_id = p_lager_id;
 
-        -- Dispensér byttepenge (procedure giver fejl hvis ikke muligt)	
+        -- Dispensér byttepenge (procedure giver fejl hvis ikke muligt)
         IF v_byttepenge > 0 THEN
-            CALL beregn_byttepenge(ny_lager_id, v_byttepenge);
+            CALL beregn_byttepenge(p_lager_id, v_byttepenge);
         END IF;
     END IF;
 
-	
-    -- update af mælk + kaffe sker gennem en trigger før en transaktion dannes
-
--- ---------------------------------------------------------------------
--- 		Dannelse af ny transaktion 
--- ---------------------------------------------------------------------
-
     -- Find næste transaktions-ID
-    SELECT MAX(transakion_id) + 1 INTO v_next_id		
+    
+     SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
       FROM transaktion;
 
     -- Indsæt transaktionen (trigger trækker ingredienser fra lager)
     INSERT INTO transaktion VALUES (
         v_next_id,
-        ny_medarbejder_id,
-        ny_drink_id,
-        ny_lager_id,
+        p_medarbejder_id,
+        p_drink_id,
+        p_lager_id,
         v_indbetalt,
-        ny_betalingstype,
+        p_betalingstype,
         v_byttepenge,
         CURRENT_DATE,
         CURRENT_TIME
     );
+END$$
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------------------------------------
+-- Opdater Daglig Forbrug Funktion
+-- -------------------------------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE TRIGGER update_daglig_forbrug
+AFTER INSERT ON transaktion
+FOR EACH ROW
+BEGIN
+    DECLARE kaffe_used INT;
+    DECLARE mælk_used INT;
+    DECLARE vand_used INT;
+    DECLARE v_exists INT;
+
+    -- Get usage from drink
+    SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
+    INTO kaffe_used, mælk_used, vand_used
+    FROM drink
+    WHERE drink_id = NEW.drink_id;
+
+    -- Check if a row for this date already exists
+    SELECT COUNT(*) INTO v_exists
+    FROM daglig_forbrug
+    WHERE dato = NEW.dato;
+
+    IF v_exists = 0 THEN
+        -- Insert new row
+        INSERT INTO daglig_forbrug (
+            forbrug_id,
+            dato,
+            sum_kaffe,
+            sum_mælk,
+            sum_vand
+        )
+        VALUES (
+            (SELECT IFNULL(MAX(forbrug_id),0)+1 FROM daglig_forbrug),
+            NEW.dato,
+            kaffe_used,
+            mælk_used,
+            vand_used
+        );
+    ELSE
+        -- Update existing row
+        UPDATE daglig_forbrug
+        SET 
+            sum_kaffe = sum_kaffe + kaffe_used,
+            sum_mælk  = sum_mælk  + mælk_used,
+            sum_vand  = sum_vand  + vand_used
+        WHERE dato = NEW.dato;
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+-- -------------------------------------------------------------------------------------
+-- Check adgang og logføring af rengøring
+-- -------------------------------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE rengør_maskine (
+    IN p_brugernavn VARCHAR(25),
+    IN p_kodeord VARCHAR(25)
+)
+BEGIN
+    DECLARE v_medarbejder_id INT;
+    DECLARE v_kodeord VARCHAR(25);
+    DECLARE v_adgang BOOL;
+    DECLARE v_next_id INT;
+
+    -- 1. Find user
+    SELECT medarbejder_id, kodeord, adgangstilladelse
+    INTO v_medarbejder_id, v_kodeord, v_adgang
+    FROM ansat
+    WHERE brugernavn = p_brugernavn;
+
+    -- 2. Check user exists
+    IF v_medarbejder_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bruger findes ikke';
+    END IF;
+
+    -- 3. Check password
+    IF v_kodeord != p_kodeord THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Forkert kodeord';
+    END IF;
+
+    -- 4. Check permission
+    IF v_adgang = FALSE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ingen adgang til rengøring';
+    END IF;
+
+    -- 5. Insert cleaning log
+    SELECT IFNULL(MAX(rengøring_id),0)+1 INTO v_next_id
+    FROM rengøring;
+
+    INSERT INTO rengøring (
+        rengøring_id,
+        medarbejder_id,
+        dato
+    )
+    VALUES (
+        v_next_id,
+        v_medarbejder_id,
+        CURRENT_DATE
+    );
+
 END$$
 
 DELIMITER ;
@@ -390,7 +576,7 @@ INSERT INTO rengøring VALUES
 -- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
 -- Kolonner: lager_id, opfyldning_id, antal_xkr ... antal_ykr, mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
 INSERT INTO lager VALUES
-(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 3000);
 
 -- Opfyldning
 -- Kolonner: opfyldning_id, medarbejder_id, opfyldning_kaffe_g, opfyldning_mælk_ml, dato, tidspunkt, opfyldning_xkr ... opfuldning_ykr
