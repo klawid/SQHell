@@ -142,17 +142,19 @@ END$$
 
 DELIMITER ;
 
+-- Anvendelse af testen:  
+	-- 1: Tjek antal transaktioner (højeste id) med nedestående SELECT (burde være 17)
+    -- 2: CALL nedestående PROCEDURE med korrekte test værdier. Disse vil danne en transaktion med irl dato og tidspunkt fra brugers pc
+    -- 3: Tjek igen antal transaktioner (højeste id) med nedestående SELECT. Denne gang vil der være +1 (burde være 18), med  nuværnde dato og tidspunkt
 
-SELECT transakion_id,dato,tidspunkt 		-- Få fist alle transaktioner? 
+SELECT transakion_id,dato,tidspunkt 			-- 1: 	
 FROM transaktion
 ORDER BY transakion_id;
 
--- brug funktionen 
-CALL køb_drink(1,3,1,0,0,0,0,0,0,0,0,0); 
 
-SELECT transakion_id,dato,tidspunkt 		-- Få fist alle transaktioner? 
+CALL køb_drink(1,3,1,0,0,0,0,0,0,0,0,0); 		-- 2:
+
+SELECT transakion_id,dato,tidspunkt 			-- 3:
 FROM transaktion
-ORDER BY dato; 
+ORDER BY transakion_id; 
 
--- Ny transaktion på plads. 
--- Har transaktionen alle sine dele med? 

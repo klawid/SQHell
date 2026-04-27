@@ -467,6 +467,7 @@ BEGIN
             v_next_id, NEW.transakion_id, NEW.dato,
             kaffe_used, mælk_used, vand_used
         );
+
     ELSE
         SELECT forbrug_id INTO v_existing_id
         FROM daglig_forbrug
