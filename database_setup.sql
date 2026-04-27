@@ -220,7 +220,7 @@ BEGIN
     FROM lager
     WHERE lager_id = p_lager_id;
 
-    -- 3. Check capacity (IMPORTANT PART)
+    -- 3. Check capacity
     IF v_kaffe + p_kaffe > v_maks_kaffe THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'For meget kaffe - overstiger lagerkapacitet';
@@ -504,6 +504,68 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+-- =====================================================================================
+-- Check adgang og logføring af rengøring
+-- =====================================================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE rengør_maskine (
+    IN p_brugernavn VARCHAR(25),
+    IN p_kodeord VARCHAR(25)
+)
+BEGIN
+    DECLARE v_medarbejder_id INT;
+    DECLARE v_kodeord VARCHAR(25);
+    DECLARE v_adgang BOOL;
+    DECLARE v_next_id INT;
+
+    -- 1. Find user
+    SELECT medarbejder_id, kodeord, adgangstilladelse
+    INTO v_medarbejder_id, v_kodeord, v_adgang
+    FROM ansat
+    WHERE brugernavn = p_brugernavn;
+
+    -- 2. Check user exists
+    IF v_medarbejder_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Bruger findes ikke';
+    END IF;
+
+    -- 3. Check password
+    IF v_kodeord != p_kodeord THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Forkert kodeord';
+    END IF;
+
+    -- 4. Check permission
+    IF v_adgang = FALSE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ingen adgang til rengøring';
+    END IF;
+
+    -- 5. Insert cleaning log
+    SELECT IFNULL(MAX(rengøring_id),0)+1 INTO v_next_id
+    FROM rengøring;
+
+    INSERT INTO rengøring (
+        rengøring_id,
+        medarbejder_id,
+        dato
+    )
+    VALUES (
+        v_next_id,
+        v_medarbejder_id,
+        CURRENT_DATE
+    );
+
+END$$
+
+DELIMITER ;
+
+
 
 -- ================================================================================
 -- Injections

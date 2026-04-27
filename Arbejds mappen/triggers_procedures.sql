@@ -76,35 +76,54 @@ BEGIN
     DECLARE v_adgang BOOL;
     DECLARE v_next_id INT;
 
+    -- NEW variables for lager
+    DECLARE v_kaffe INT;
+    DECLARE v_mælk INT;
+    DECLARE v_maks_kaffe INT;
+    DECLARE v_maks_mælk INT;
+
     -- 1. Find bruger
     SELECT medarbejder_id, kodeord, adgangstilladelse
     INTO v_medarbejder_id, v_kodeord, v_adgang
     FROM ansat
     WHERE brugernavn = p_brugernavn;
 
-    -- 2. Check bruger findes
     IF v_medarbejder_id IS NULL THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Bruger findes ikke';
     END IF;
 
-    -- 3. Check kodeord
     IF v_kodeord != p_kodeord THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Forkert kodeord';
     END IF;
 
-    -- 4. Check adgang
     IF v_adgang = FALSE THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Ingen adgang til opfyldning';
     END IF;
 
-    -- 5. Generer ID
+    -- 2. Get current lager values
+    SELECT mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
+    INTO v_kaffe, v_mælk, v_maks_kaffe, v_maks_mælk
+    FROM lager
+    WHERE lager_id = p_lager_id;
+    
+    IF v_kaffe + p_kaffe > v_maks_kaffe THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'For meget kaffe - overstiger lagerkapacitet';
+    END IF;
+
+    IF v_mælk + p_mælk > v_maks_mælk THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'For meget mælk - overstiger lagerkapacitet';
+    END IF;
+
+    -- 4. Generate ID
     SELECT IFNULL(MAX(opfyldning_id),0)+1 INTO v_next_id
     FROM opfyldning;
 
-    -- 6. Indsæt opfyldning
+    -- 5. Insert opfyldning
     INSERT INTO opfyldning VALUES (
         v_next_id,
         v_medarbejder_id,
@@ -116,8 +135,6 @@ BEGIN
         p_200, p_100, p_50, p_20,
         p_10, p_5, p_2, p_1
     );
-
-    -- 7. AFTER trigger opdaterer lager automatisk
 
 END$$
 
