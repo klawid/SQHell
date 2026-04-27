@@ -72,7 +72,7 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
 
 
 -- ---------------------------------------------------------------------
--- QUERY 2: Lagerstatus — nuværende beholdning
+-- QUERY 2: Lagerstatus 
 -- ---------------------------------------------------------------------
 
 -- 2a: Ingredienser (kaffe, mælk) med fyldningsgrad i procent		// er fyldnignsgrad i % vejen frem? Hvorfor gør vi det således.

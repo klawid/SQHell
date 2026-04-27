@@ -4,40 +4,44 @@
 
 -- Trigger kode for lager 
 -- Ai was used in creation of this
-
 DELIMITER $$
 
-CREATE TRIGGER update_lager_after_transaktion
-AFTER INSERT ON transaktion
+CREATE TRIGGER update_lager_før_transaktion
+BEFORE INSERT ON transaktion
 FOR EACH ROW
 BEGIN
-    DECLARE kaffe_used INT;
-    DECLARE mælk_used INT;
-    DECLARE vand_used INT;
+    DECLARE kaffe_brugt INT;
+    DECLARE mælk_brugt INT;
+    DECLARE vand_brugt INT;
 
-    -- Få ingredient fra "drink"
+    --  ingredient usage from drink
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
-    INTO kaffe_used, mælk_used, vand_used
+    INTO kaffe_brugt, mælk_brugt, vand_brugt
     FROM drink
     WHERE drink_id = NEW.drink_id;
 
 -- Tjek om der er nok kaffe på lageret
-IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_used THEN
+IF (SELECT mængde_kaffe FROM lager WHERE lager_id = NEW.lager_id) < kaffe_brugt THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ikke nok kaffe på lager';
 END IF;	
 
  -- Tjek om der er nok mælk
-IF (SELECT mængde_mælk FROM lager WHERE lager_id = NEW.lager_id) < mælk_used THEN
+IF (SELECT mængde_mælk FROM lager WHERE lager_id = NEW.lager_id) < mælk_brugt THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ikke nok mælk på lager';
 END IF;
 
+-- noget med penge 
+-- if( byttepenge_burg_for) then 
+-- beregn_byttepenge(1,2); do this idk 
+
+
     -- Update lager (assuming only one row with id = 1)
     UPDATE lager
     SET 
-        mængde_kaffe = mængde_kaffe - kaffe_used,
-        mængde_mælk = mængde_mælk - mælk_used
+        mængde_kaffe = mængde_kaffe -  kaffe_brugt,
+        mængde_mælk = mængde_mælk - mælk_brugt
     WHERE lager_id = NEW.lager_id;
 
 
@@ -45,7 +49,6 @@ END IF;
 END$$
 
 DELIMITER ;
-
 -- =====================================================================================
 -- Check adgang for opfyldning
 -- =====================================================================================

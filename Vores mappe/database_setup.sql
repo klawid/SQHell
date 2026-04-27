@@ -151,8 +151,8 @@ END IF;
     -- Update lager (assuming only one row with id = 1)
     UPDATE lager
     SET 
-        mængde_kaffe = mængde_kaffe - kaffe_used,
-        mængde_mælk = mængde_mælk - mælk_used
+        mængde_kaffe = mængde_kaffe -  kaffe_brugt,
+        mængde_mælk = mængde_mælk - mælk_brugt
     WHERE lager_id = NEW.lager_id;
 
 
