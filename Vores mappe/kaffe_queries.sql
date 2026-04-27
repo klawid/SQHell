@@ -151,13 +151,13 @@ SELECT r.rengøring_id,
 CALL rengør_maskine('KlDa', 'JegErSej1');
 
 -- 3c: Ingen adgang til at rengøre
-CaLL rengør_maskine('JeGi', 'kodeord123');
+CALL rengør_maskine('JeGi', 'kodeord123');
 
 -- 3d: Forkert kodeord
 CALL rengør_maskine('KlDa', 'forkert');
 
 -- 3e: Forkert brugernavn
-CaLL rengør_maskine('unknown', '123');
+CALL rengør_maskine('unknown', '123');
 
 -- ---------------------------------------------------------------------
 -- QUERY 4: Opfyldningshistorik
