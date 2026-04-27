@@ -1,6 +1,6 @@
 
 -- ---------------------------------------------------------------------
--- QUERY 1: Transaktioner — filtrerbar efter tidsrum, drink, betalingstype
+-- QUERY 1: Transaktioner — filtrer efter tidsrum, drink og betalingstype
 -- ---------------------------------------------------------------------
 -- Brug NULL i en filter-variabel for "alle". Sæt en værdi for at filtrere.
 -- Eksemplerne nedenfor demonstrerer forskellige kombinationer.
@@ -71,8 +71,10 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
  ORDER BY t.dato, t.tidspunkt;
 
 
+
 -- ---------------------------------------------------------------------
--- QUERY 2: Lagerstatus 
+--  QUERY 2: Lagerstatus 
+--  Forksellige test/check af lagerstatus 
 -- ---------------------------------------------------------------------
 
 -- 2a: Ingredienser (kaffe, mælk) med fyldningsgrad i procent		// er fyldnignsgrad i % vejen frem? Hvorfor gør vi det således.
@@ -208,7 +210,7 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, 
 
 -- =====================================================================
 -- Test af: 	TRIGGER Transaktion
--- Funktion: 	updater lager (kaffe og mælk indhold) 
+-- Funktion: 	Updater lager (kaffe og mælk indhold) 
 -- =====================================================================
 
 -- Anvendelse af testen:  
