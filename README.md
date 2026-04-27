@@ -11,4 +11,4 @@ Disse inkluderer de af opgaven udspecificerede 3 tests, men også andre tests.
 Arbejds mappen er mappen vi har arbejdet i. Her findes de individuelle filer til dannelsen af entities, triggers og procedurer, samt injection data. Det er disse filer der er samlet i database_setup, men vi har beholdt de gamle filer, fordi de er nemmere at kigge igennem når man vil zoome ind, fremfor at have det store billede.
 
 
-Vi håber du nyder at teste databasen, mere end vi har nydt at lave den
+Vi håber du nyder at teste databasen, mere end vi har nydt at lave den :-D tihi
