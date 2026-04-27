@@ -71,7 +71,7 @@ CREATE TABLE lager(
 );
 
 CREATE TABLE transaktion(
-transakion_id			int not null,
+transaktion_id			int not null,
 medarbejder_id			int not null,
 drink_id				int not null,
 lager_id  				int not null,
@@ -80,7 +80,7 @@ betalingstype			bool not null, -- FALSE er kort, TRUE er kontant
 byttepenge				int not null, -- Hvis vi kun har hele kroner der kan betales med, og hele priser på drinks, så kan denne vel godt være en int (Var float)
 dato 					date not null,	
 tidspunkt 				time not null,
-primary key(transakion_id),
+primary key(transaktion_id),
 foreign key (medarbejder_id) references ansat(medarbejder_id),
 foreign key (drink_id) references drink(drink_id),
 foreign key (lager_id) references lager(lager_id)
@@ -88,13 +88,12 @@ foreign key (lager_id) references lager(lager_id)
 
 CREATE TABLE daglig_forbrug(
 forbrug_id			int not null,
-transakion_id		int not null,
 dato				date not null,
 sum_kaffe			int not null,
 sum_mælk			int not null,
 sum_vand			int not null,
-primary key(forbrug_id),
-foreign key (transakion_id) references transaktion(transakion_id)
+primary key(forbrug_id)
+
 );
 
 

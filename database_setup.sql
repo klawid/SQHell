@@ -4,7 +4,8 @@
 -- ================================================================================
 DROP DATABASE IF EXISTS kaffemaskine;
 CREATE DATABASE kaffemaskine;
-USE kaffemaskine;
+USE kaffemaskine;				-- Note: this dosent always work, and sometimes has to be manually 
+
 
 -- ================================================================================
 -- Entities

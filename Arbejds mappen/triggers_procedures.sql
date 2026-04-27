@@ -312,7 +312,7 @@ BEGIN
 
     -- Find næste transaktions-ID
     
-     SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
+     SELECT IFNULL(MAX(transaktion_id), 0) + 1 INTO v_next_id
       FROM transaktion;
 
     -- Indsæt transaktionen (trigger trækker ingredienser fra lager)

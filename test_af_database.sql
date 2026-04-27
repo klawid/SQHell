@@ -6,13 +6,18 @@
 -- Eksemplerne nedenfor demonstrerer forskellige kombinationer.
 -- ---------------------------------------------------------------------
 
+-- Anvendelse af nedestående test: 
+	-- 1: Load værdierne ind i filterne/variablerne (compile SET delen)
+    -- 2: Kør nedestående SELECT der anvender variablerne/filterne. 
+
+
 -- EKSEMPEL 1a: ALLE transaktioner (general test)
 SET @fra_dato       = NULL, 
 @til_dato       = NULL, 
 @drink_id       = NULL, 
 @betalingstype  = NULL;
 
-SELECT t.transakion_id,
+SELECT t.transaktion_id,
        t.dato,
        t.tidspunkt,
        a.navn 			AS fornavn,
@@ -38,7 +43,7 @@ SET @fra_dato       = '2026-02-01' ,
 	@drink_id       = NULL,
 	@betalingstype  = NULL;
 	
-SELECT t.transakion_id, t.dato, t.tidspunkt,
+SELECT t.transaktion_id, t.dato, t.tidspunkt,
        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
        d.navn AS drink, d.drink_pris,
        CASE t.betalingstype WHEN 0 THEN 'Kort' ELSE 'Kontant' END AS betaling
@@ -58,7 +63,7 @@ SET @fra_dato       = NULL,
 @drink_id       = 3,
 @betalingstype  = 1;
 
-SELECT t.transakion_id, t.dato, t.tidspunkt,
+SELECT t.transaktion_id, t.dato, t.tidspunkt,
        CONCAT(a.navn, ' ', a.efternavn) AS medarbejder,
        d.navn AS drink, t.kontant_indbetaling, t.byttepenge
   FROM transaktion t
@@ -105,7 +110,7 @@ SELECT
     t.dato,
     t.tidspunkt,
     'Transaktion' AS hændelse,
-    t.transakion_id AS id,
+    t.transaktion_id AS id,
     d.mælk_forbrug_ml AS brugt_mælk,
     d.kaffe_forbrug_g AS brugt_kaffe,
     d.vand_forbrug_ml AS brugt_vand,
@@ -114,9 +119,7 @@ SELECT
 FROM transaktion t
 JOIN drink d ON t.drink_id = d.drink_id
 WHERE t.dato = @dato
-
 UNION ALL
-
 SELECT
     o.dato,
     o.tidspunkt,
@@ -208,6 +211,9 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, 
 
 
 
+
+
+
 -- =====================================================================
 -- Test af: 	TRIGGER Transaktion
 -- Funktion: 	Updater lager (kaffe og mælk indhold) 
@@ -255,7 +261,7 @@ FROM lager
 WHERE lager_id = 1;
 
 INSERT INTO transaktion VALUES    -- 5: Udfør test inserten igen, der denne gang vil virke.				
-(99,  1, 2, 1,  0,  0, 0, '2026-02-05', '05:06:51');
+	(99,  1, 2, 1,  0,  0, 0, '2026-02-05', '05:06:51');
 
 
 SELECT							  -- 6: Compile af denne select vil visse "efter_kaffe" med nye værdier pga. TRIGGER, der automatisk har opdateret lager. Her vil ny værdi og kaffe- samt mælk kosten for drunk 2 kunne ses 								
@@ -271,22 +277,25 @@ WHERE lager_id = 1;
 
 
 
+
+
+
 -- =====================================================================
 -- Test af: 	PROCEDURE køb_drink
 -- Funktion: 	Danner/adder en ny transaktion 
 -- =====================================================================
 -- Anvendelse af testen:  
-	-- 1: Tjek antal transaktioner (højeste id) med nedestående SELECT (burde være 17)
+	-- 1: Tjek antal transaktioner (højeste id) med nedestående SELECT (burde være 17, men kan være 99 pga. af forrig test)
     -- 2: CALL nedestående PROCEDURE med korrekte test værdier. Disse vil danne en transaktion med irl dato og tidspunkt fra brugers pc
-    -- 3: Tjek igen antal transaktioner (højeste id) med nedestående SELECT. Denne gang vil der være +1 (burde være 18), med  nuværnde dato og tidspunkt
+    -- 3: Tjek igen antal transaktioner (højeste id) med nedestående SELECT. Denne gang vil der være +1 (burde være 18 eller 100), med  nuværnde dato og tidspunkt
 
-SELECT transakion_id,dato,tidspunkt 			-- 1: 	
+SELECT transaktion_id,dato,tidspunkt 			-- 1: 	
 FROM transaktion
-ORDER BY transakion_id;
+ORDER BY transaktion_id;
 
 CALL køb_drink(1,3,1,0,0,0,0,0,0,0,0,0); 		-- 2:
 
-SELECT transakion_id,dato,tidspunkt 			-- 3:
+SELECT transaktion_id,dato,tidspunkt 			-- 3:
 FROM transaktion
-ORDER BY transakion_id; 
+ORDER BY transaktion_id; 
 
