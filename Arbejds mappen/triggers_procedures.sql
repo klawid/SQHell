@@ -329,7 +329,7 @@ BEGIN
     DECLARE mælk_used INT;
     DECLARE vand_used INT;
     DECLARE v_exists INT;
-    DECLARE v_next_id INT;   -- ✅ new variable
+    DECLARE v_next_id INT;  
 
     -- Get usage from drink
     SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
@@ -344,12 +344,12 @@ BEGIN
 
     IF v_exists = 0 THEN
 
-        -- ✅ FIX: calculate ID BEFORE insert
+    
         SELECT IFNULL(MAX(forbrug_id),0)+1
         INTO v_next_id
         FROM daglig_forbrug;
 
-        -- Insert new row
+        
         INSERT INTO daglig_forbrug (
             forbrug_id,
             dato,
@@ -366,7 +366,6 @@ BEGIN
         );
 
     ELSE
-        -- Update existing row
         UPDATE daglig_forbrug
         SET 
             sum_kaffe = sum_kaffe + kaffe_used,
