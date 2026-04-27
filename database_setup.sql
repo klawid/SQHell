@@ -442,115 +442,47 @@ BEGIN
     DECLARE mælk_used INT;
     DECLARE vand_used INT;
     DECLARE v_exists INT;
-    DECLARE v_next_id INT;   -- ✅ new variable
+    DECLARE v_existing_id INT;
+    DECLARE v_next_id INT;
 
-    -- Get usage from drink
     SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
     INTO kaffe_used, mælk_used, vand_used
     FROM drink
     WHERE drink_id = NEW.drink_id;
 
-    -- Check if a row for this date already exists
     SELECT COUNT(*) INTO v_exists
     FROM daglig_forbrug
     WHERE dato = NEW.dato;
 
     IF v_exists = 0 THEN
-
-        -- ✅ FIX: calculate ID BEFORE insert
-        SELECT IFNULL(MAX(forbrug_id),0)+1
+        SELECT IFNULL(MAX(forbrug_id), 0) + 1
         INTO v_next_id
         FROM daglig_forbrug;
 
-        -- Insert new row
         INSERT INTO daglig_forbrug (
-            forbrug_id,
-            dato,
-            sum_kaffe,
-            sum_mælk,
-            sum_vand
+            forbrug_id, transakion_id, dato,
+            sum_kaffe, sum_mælk, sum_vand
         )
         VALUES (
-            v_next_id,
-            NEW.dato,
-            kaffe_used,
-            mælk_used,
-            vand_used
+            v_next_id, NEW.transakion_id, NEW.dato,
+            kaffe_used, mælk_used, vand_used
         );
 
     ELSE
-        -- Update existing row
+        SELECT forbrug_id INTO v_existing_id
+        FROM daglig_forbrug
+        WHERE dato = NEW.dato
+        LIMIT 1;
+
         UPDATE daglig_forbrug
-        SET 
-            sum_kaffe = sum_kaffe + kaffe_used,
+        SET sum_kaffe = sum_kaffe + kaffe_used,
             sum_mælk  = sum_mælk  + mælk_used,
             sum_vand  = sum_vand  + vand_used
-        WHERE dato = NEW.dato;
+        WHERE forbrug_id = v_existing_id;
     END IF;
-
 END$$
 
 DELIMITER ;
-
--- -------------------------------------------------------------------------------------
--- Check adgang og logføring af rengøring
--- -------------------------------------------------------------------------------------
-
-DELIMITER $$
-
-CREATE PROCEDURE rengør_maskine (
-    IN p_brugernavn VARCHAR(25),
-    IN p_kodeord VARCHAR(25)
-)
-BEGIN
-    DECLARE v_medarbejder_id INT;
-    DECLARE v_kodeord VARCHAR(25);
-    DECLARE v_adgang BOOL;
-    DECLARE v_next_id INT;
-
-    -- 1. Find user
-    SELECT medarbejder_id, kodeord, adgangstilladelse
-    INTO v_medarbejder_id, v_kodeord, v_adgang
-    FROM ansat
-    WHERE brugernavn = p_brugernavn;
-
-    -- 2. Check user exists
-    IF v_medarbejder_id IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Bruger findes ikke';
-    END IF;
-
-    -- 3. Check password
-    IF v_kodeord != p_kodeord THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Forkert kodeord';
-    END IF;
-
-    -- 4. Check permission
-    IF v_adgang = FALSE THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ingen adgang til rengøring';
-    END IF;
-
-    -- 5. Insert cleaning log
-    SELECT IFNULL(MAX(rengøring_id),0)+1 INTO v_next_id
-    FROM rengøring;
-
-    INSERT INTO rengøring (
-        rengøring_id,
-        medarbejder_id,
-        dato
-    )
-    VALUES (
-        v_next_id,
-        v_medarbejder_id,
-        CURRENT_DATE
-    );
-
-END$$
-
-DELIMITER ;
-
 
 -- ================================================================================
 -- Injections
