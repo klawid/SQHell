@@ -1,6 +1,6 @@
 
 -- ---------------------------------------------------------------------
--- QUERY 1: Transaktioner — filtrerbar efter tidsrum, drink, betalingstype
+-- QUERY 1: Transaktioner — filtrer efter tidsrum, drink og betalingstype
 -- ---------------------------------------------------------------------
 -- Brug NULL i en filter-variabel for "alle". Sæt en værdi for at filtrere.
 -- Eksemplerne nedenfor demonstrerer forskellige kombinationer.
@@ -71,8 +71,10 @@ SELECT t.transakion_id, t.dato, t.tidspunkt,
  ORDER BY t.dato, t.tidspunkt;
 
 
+
 -- ---------------------------------------------------------------------
--- QUERY 2: Lagerstatus 
+--  QUERY 2: Lagerstatus 
+--  Forksellige test/check af lagerstatus 
 -- ---------------------------------------------------------------------
 
 -- 2a: Ingredienser (kaffe, mælk) med fyldningsgrad i procent		// er fyldnignsgrad i % vejen frem? Hvorfor gør vi det således.
@@ -206,11 +208,9 @@ SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, 
 
 
 
-
-
-
 -- =====================================================================
--- Test af: TRIGGER Transaktion
+-- Test af: 	TRIGGER Transaktion
+-- Funktion: 	Updater lager (kaffe og mælk indhold) 
 -- =====================================================================
 
 -- Anvendelse af testen:  
@@ -258,7 +258,7 @@ INSERT INTO transaktion VALUES    -- 5: Udfør test inserten igen, der denne gan
 (99,  1, 2, 1,  0,  0, 0, '2026-02-05', '05:06:51');
 
 
-SELECT								-- 6: Compile af denne select vil visse "efter_kaffe" med nye værdier pga. TRIGGER, der automatisk har opdateret lager. Her vil ny værdi og kaffe- samt mælk kosten for drunk 2 kunne ses 								
+SELECT							  -- 6: Compile af denne select vil visse "efter_kaffe" med nye værdier pga. TRIGGER, der automatisk har opdateret lager. Her vil ny værdi og kaffe- samt mælk kosten for drunk 2 kunne ses 								
     @for_kaffe	 AS kaffe_før_update,
     mængde_kaffe AS efter_kaffe,
     @for_melk AS mælk_før_update,
@@ -272,7 +272,21 @@ WHERE lager_id = 1;
 
 
 -- =====================================================================
--- Test af: PROCEDURE køb_drink
+-- Test af: 	PROCEDURE køb_drink
+-- Funktion: 	Danner/adder en ny transaktion 
 -- =====================================================================
+-- Anvendelse af testen:  
+	-- 1: Tjek antal transaktioner (højeste id) med nedestående SELECT (burde være 17)
+    -- 2: CALL nedestående PROCEDURE med korrekte test værdier. Disse vil danne en transaktion med irl dato og tidspunkt fra brugers pc
+    -- 3: Tjek igen antal transaktioner (højeste id) med nedestående SELECT. Denne gang vil der være +1 (burde være 18), med  nuværnde dato og tidspunkt
 
+SELECT transakion_id,dato,tidspunkt 			-- 1: 	
+FROM transaktion
+ORDER BY transakion_id;
+
+CALL køb_drink(1,3,1,0,0,0,0,0,0,0,0,0); 		-- 2:
+
+SELECT transakion_id,dato,tidspunkt 			-- 3:
+FROM transaktion
+ORDER BY transakion_id; 
 
