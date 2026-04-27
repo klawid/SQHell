@@ -79,7 +79,7 @@ CREATE TABLE lager(
 );
 
 CREATE TABLE transaktion(
-transakion_id			int not null,
+transaktion_id			int not null,
 medarbejder_id			int not null,
 drink_id				int not null,
 lager_id  				int not null,
@@ -88,21 +88,19 @@ betalingstype			bool not null, -- FALSE er kort, TRUE er kontant
 byttepenge				int not null, -- Hvis vi kun har hele kroner der kan betales med, og hele priser på drinks, så kan denne vel godt være en int (Var float)
 dato 					date not null,	
 tidspunkt 				time not null,
-primary key(transakion_id),
+primary key (transaktion_id),
 foreign key (medarbejder_id) references ansat(medarbejder_id),
 foreign key (drink_id) references drink(drink_id),
 foreign key (lager_id) references lager(lager_id)
 );
 
 CREATE TABLE daglig_forbrug(
-forbrug_id			int not null,
-transakion_id		int not null,
-dato				date not null,
-sum_kaffe			int not null,
-sum_mælk			int not null,
-sum_vand			int not null,
-primary key(forbrug_id),
-foreign key (transakion_id) references transaktion(transakion_id)
+    forbrug_id   int not null,
+    dato         date not null,
+    sum_kaffe    int not null,
+    sum_mælk     int not null,
+    sum_vand     int not null,
+    primary key(forbrug_id)
 );
 
 
@@ -216,13 +214,13 @@ BEGIN
         SET MESSAGE_TEXT = 'Ingen adgang til opfyldning';
     END IF;
 
-    -- 🔥 2. Get current lager values
+    -- 2. Get current lager values
     SELECT mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
     INTO v_kaffe, v_mælk, v_maks_kaffe, v_maks_mælk
     FROM lager
     WHERE lager_id = p_lager_id;
 
-    -- 🔥 3. Check capacity (IMPORTANT PART)
+    -- 3. Check capacity (IMPORTANT PART)
     IF v_kaffe + p_kaffe > v_maks_kaffe THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'For meget kaffe - overstiger lagerkapacitet';
@@ -426,7 +424,7 @@ BEGIN
 
     -- Find næste transaktions-ID
     
-     SELECT IFNULL(MAX(transakion_id), 0) + 1 INTO v_next_id
+     SELECT IFNULL(MAX(transaktion_id), 0) + 1 INTO v_next_id
       FROM transaktion;
 
     -- Indsæt transaktionen (trigger trækker ingredienser fra lager)
@@ -460,27 +458,23 @@ BEGIN
     DECLARE mælk_used INT;
     DECLARE vand_used INT;
     DECLARE v_exists INT;
-    DECLARE v_next_id INT;  
+    DECLARE v_existing_id INT;
+    DECLARE v_next_id INT;
 
-    -- Get usage from drink
     SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
     INTO kaffe_used, mælk_used, vand_used
     FROM drink
     WHERE drink_id = NEW.drink_id;
 
-    -- Check if a row for this date already exists
     SELECT COUNT(*) INTO v_exists
     FROM daglig_forbrug
     WHERE dato = NEW.dato;
 
     IF v_exists = 0 THEN
-
-    
-        SELECT IFNULL(MAX(forbrug_id),0)+1
+        SELECT IFNULL(MAX(forbrug_id), 0) + 1
         INTO v_next_id
         FROM daglig_forbrug;
 
-        
         INSERT INTO daglig_forbrug (
             forbrug_id,
             dato,
@@ -495,16 +489,18 @@ BEGIN
             mælk_used,
             vand_used
         );
-
     ELSE
+        SELECT forbrug_id INTO v_existing_id
+        FROM daglig_forbrug
+        WHERE dato = NEW.dato
+        LIMIT 1;
+
         UPDATE daglig_forbrug
-        SET 
-            sum_kaffe = sum_kaffe + kaffe_used,
+        SET sum_kaffe = sum_kaffe + kaffe_used,
             sum_mælk  = sum_mælk  + mælk_used,
             sum_vand  = sum_vand  + vand_used
-        WHERE dato = NEW.dato;
+        WHERE forbrug_id = v_existing_id;
     END IF;
-
 END$$
 
 DELIMITER ;
