@@ -23,6 +23,11 @@ INSERT INTO rengøring VALUES
 (4, 1, '2026-02-23'),
 (5, 1, '2026-03-02');
 
+-- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
+-- Kolonner: lager_id, opfyldning_id, antal_xkr ... antal_ykr, mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
+INSERT INTO lager VALUES
+(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 3000);
+
 
 -- Opfyldning
 -- Kolonner: opfyldning_id, medarbejder_id, opfyldning_kaffe_g, opfyldning_mælk_ml, dato, tidspunkt, opfyldning_xkr ... opfuldning_ykr
@@ -34,10 +39,6 @@ INSERT INTO opfyldning VALUES
 (5, 2, 1000, 200, '2026-02-05', '5:16:51', 0, 0, 0, 0, 0, 0, 0, 0);
 
 
--- Lager (starttilstand – ingen opfyldning endnu, så opfyldning_id sættes til NULL)
--- Kolonner: lager_id, opfyldning_id, antal_xkr ... antal_ykr, mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
-INSERT INTO lager VALUES
-(1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 2000);
 
 
 -- Transaktioner
