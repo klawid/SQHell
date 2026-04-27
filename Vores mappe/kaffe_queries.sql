@@ -177,14 +177,8 @@ SELECT o.opfyldning_id,
   ORDER BY o.dato, o.tidspunkt;
 
 -- 4b: Indsæt en opfyldning korrekt
-CALL opfyld_lager_login(
-    'KlDa',        -- brugernavn
-    'JegErSej1',   -- kodeord
-    1,             -- lager_id
-    500,           -- kaffe
-    200,           -- mælk
-    1,0,0,0,0,0,0,0
-);
+-- Kolonner: brugernavn, kodeord, lager_id, opfyldning_kaffe_g, opfyldning_mælk_ml, opfyldning_xkr ... opfyldning_ykr
+CALL opfyld_lager_login('KlDa', 'JegErSej1', 1, 500, 200, 1,0,0,0,0,0,0,0);
 
 -- 4c: Ingen adgang til at opfylde lageret
 CALL opfyld_lager_login('JeGi', 'kodeord123', 1, 500, 200, 0,0,0,0,0,0,0,0);
