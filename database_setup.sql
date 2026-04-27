@@ -216,13 +216,12 @@ BEGIN
         SET MESSAGE_TEXT = 'Ingen adgang til opfyldning';
     END IF;
 
-    -- 🔥 2. Get current lager values
+    -- 2. Get current lager values
     SELECT mængde_kaffe, mængde_mælk, maks_kaffe, maks_mælk
     INTO v_kaffe, v_mælk, v_maks_kaffe, v_maks_mælk
     FROM lager
     WHERE lager_id = p_lager_id;
-
-    -- 🔥 3. Check capacity (IMPORTANT PART)
+    
     IF v_kaffe + p_kaffe > v_maks_kaffe THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'For meget kaffe - overstiger lagerkapacitet';
