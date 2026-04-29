@@ -299,3 +299,22 @@ SELECT transaktion_id,dato,tidspunkt 			-- 3:
 FROM transaktion
 ORDER BY transaktion_id; 
 
+-- =====================================================================
+-- Test af: 	PROCEDURE køb_drink (kontant)
+-- Funktion: 	Danner/adder en ny transaktion 
+-- Note: Hvis du tømmerkontantlageret først, vil denne funktion returnere en fejl og ikke gennemføre transaktionen
+-- =====================================================================
+
+SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, antal_2kr, antal_1kr FROM lager WHERE lager_id = 1;
+
+SELECT transaktion_id,dato,tidspunkt 			-- 1: 	
+FROM transaktion
+ORDER BY transaktion_id;
+
+CALL køb_drink(1,3,1,1,0,1,0,0,0,0,0,0); 		-- 2:
+
+SELECT transaktion_id,dato,tidspunkt 			-- 3:
+FROM transaktion
+ORDER BY transaktion_id; 
+
+SELECT antal_200kr, antal_100kr, antal_50kr, antal_20kr, antal_10kr, antal_5kr, antal_2kr, antal_1kr FROM lager WHERE lager_id = 1;

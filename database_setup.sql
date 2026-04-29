@@ -115,7 +115,7 @@ CREATE TABLE daglig_forbrug(
 -- -------------------------------------------------------------------------------------
 
 -- Trigger kode for lager 
--- Ai was used in creation of this
+-- Ai was used in creation of some of this
 DELIMITER $$
 
 CREATE TRIGGER update_lager_før_transaktion
@@ -126,7 +126,7 @@ BEGIN
     DECLARE mælk_brugt INT;
     DECLARE vand_brugt INT;
 
-    --  ingredient usage from drink
+    --  Ingrediens forbrug fra drink
 	SELECT kaffe_forbrug_g, mælk_forbrug_ml, vand_forbrug_ml
     INTO kaffe_brugt, mælk_brugt, vand_brugt
     FROM drink
